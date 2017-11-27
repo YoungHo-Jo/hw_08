@@ -1,0 +1,23 @@
+/*
+ * main.c
+ *
+ *  Created on: 2017. 11. 27.
+ *      Author: hw_8
+ */
+
+#include "init.h"
+#include "touchSensor.h"
+#include "lcdInit.c"
+
+int main() {
+	// set system and set clock
+	defaultSystemInit();
+
+	LCD_Init();
+	LCD_Clear(WHITE);
+	GPIO_touch_init_all();
+
+	while (1) {
+
+	}
+}

@@ -1,0 +1,108 @@
+/*
+ * touchSensor.c
+ *
+ *  Created on: 2017. 11. 27.
+ *      Author: hw_8
+ */
+#include "misc.h"
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_exti.h"
+#include "stm32f10x_rcc.h"
+#include "stm32f10x_tim.h"
+#include "lcd.h"
+
+const uint16_t TOUCH_DO = GPIO_Pin_0;
+const uint16_t TOUCH_RE = GPIO_Pin_8;
+const uint16_t TOUCH_MI = GPIO_Pin_9;
+const uint16_t TOUCH_FA = GPIO_Pin_7;
+const uint16_t TOUCH_SO = GPIO_Pin_5;
+const uint16_t TOUCH_LA = GPIO_Pin_4;
+const uint16_t TOUCH_TI = GPIO_Pin_3;
+
+/*
+GPIO_Pin_0
+PE0  도
+PB8  레
+PB9  미
+PB7  파
+PB5  솔
+PB4  라
+PB3  시
+PA15
+*/
+
+/**
+ * Returns GPIO_PinSource according to the paramter GPIO_Pin
+ */
+int syllable = 0;
+
+typedef struct __GPIO_setting_data {
+    uint8_t pin_src;
+    uint32_t exti_line;
+    uint32_t exti_irqn;
+    uint8_t port_src;
+    GPIO_TypeDef * GPIOx;
+} GPIO_setting_data;
+
+void EXTI0_IRQHandler(void);
+
+void EXTI3_IRQHandler(void);
+}
+
+void EXTI4_IRQHandler(void);
+
+void EXTI9_5_IRQHandler(void);
+
+
+GPIO_setting_data get_GPIO_Setting_Data(uint16_t key);
+
+void GPIO_touch_init(uint16_t key);
+
+void GPIO_touch_init_all() {
+	GPIO_touch_init(TOUCH_DO);
+	GPIO_touch_init(TOUCH_RE);
+	GPIO_touch_init(TOUCH_MI);
+	GPIO_touch_init(TOUCH_FA);
+	GPIO_touch_init(TOUCH_SO);
+	GPIO_touch_init(TOUCH_LA);
+	GPIO_touch_init(TOUCH_TI);
+}
+
+void TIM2_IRQHandler(void) //핸들러 함수에서  TIM_GetITStatus(TIM2,TIM_IT_Update)를 통해서 인터럽트 플래그가  set 되어있는지 확인하고 내가 만든 변수 증가한다.
+{
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
+		LCD_ShowNum(100, 200, syllable, 5, WHITE, BLUE);
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); // Clear the interrupt flag
+	}
+}
+
+void init_Timer2() {
+	NVIC_InitTypeDef NVIC_InitStructure;
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+
+	/* TIM2 Clock Enable */
+
+	/* Enable TIM2 Global Interrupt */
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);  //NVIC 초기화
+
+	/* TIM2 Initialize */
+	TIM_TimeBaseStructure.TIM_Period = 200 - 1; // 100kHz// 주기
+	TIM_TimeBaseStructure.TIM_Prescaler = 1000 - 1; //
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure); //타임 초기화
+
+	/* TIM2 Enale */
+	TIM_Cmd(TIM2, ENABLE); //타이머가 가득차면 인터럽트 발생
+	TIM_ITConfig(TIM2, TIM_IT_Update | TIM_IT_CC1, ENABLE); // interrupt enable
+}
+
+
+
+
+
