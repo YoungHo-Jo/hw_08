@@ -1,0 +1,94 @@
+19:45:16 **** Incremental Build of configuration Debug for project hw_team08 ****
+make all 
+'Building file: ../main.c'
+'Invoking: ARM C Compiler 5'
+armcc -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\CoreSupport" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\DeviceSupport" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\DeviceSupport\Startup" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\inc" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\lcd_lib" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\src" -O0 --cpu=cortex-m3 -g -c -o "main.o" "../main.c"
+"../init.c", line 11: Warning:  #1295-D: Deprecated declaration SysInit - give arg types
+  void SysInit();
+       ^
+"../init.c", line 12: Warning:  #1295-D: Deprecated declaration SetSysClock - give arg types
+  void SetSysClock();
+       ^
+"../pressureSensor.c", line 35: Warning:  #940-D: missing return statement at end of non-void function "getPressurePinSrc"
+  }
+  ^
+"../pressureSensor.c", line 58: Warning:  #940-D: missing return statement at end of non-void function "get_pressure_EXTI_Line"
+  }
+  ^
+"../pressureSensor.c", line 80: Warning:  #940-D: missing return statement at end of non-void function "get_pressure_EXIT_IRQn"
+  }
+  ^
+"../pressureSensor.c", line 103: Warning:  #940-D: missing return statement at end of non-void function "get_pressure_GPIO_PinSource"
+  }
+  ^
+"../pressureSensor.c", line 126: Warning:  #940-D: missing return statement at end of non-void function "get_pressure_GPIO_TypeDef"
+   }
+   ^
+../main.c: 7 warnings, 0 errors
+'Finished building: ../main.c'
+' '
+'Building file: ../pressureSensor.c'
+'Invoking: ARM C Compiler 5'
+armcc -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\CoreSupport" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\DeviceSupport" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\DeviceSupport\Startup" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\inc" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\lcd_lib" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\src" -O0 --cpu=cortex-m3 -g -c -o "pressureSensor.o" "../pressureSensor.c"
+"../pressureSensor.c", line 35: Warning:  #940-D: missing return statement at end of non-void function "getPressurePinSrc"
+  }
+  ^
+"../pressureSensor.c", line 58: Warning:  #940-D: missing return statement at end of non-void function "get_pressure_EXTI_Line"
+  }
+  ^
+"../pressureSensor.c", line 80: Warning:  #940-D: missing return statement at end of non-void function "get_pressure_EXIT_IRQn"
+  }
+  ^
+"../pressureSensor.c", line 103: Warning:  #940-D: missing return statement at end of non-void function "get_pressure_GPIO_PinSource"
+  }
+  ^
+"../pressureSensor.c", line 126: Warning:  #940-D: missing return statement at end of non-void function "get_pressure_GPIO_TypeDef"
+   }
+   ^
+../pressureSensor.c: 5 warnings, 0 errors
+'Finished building: ../pressureSensor.c'
+' '
+'Building file: ../sound.c'
+'Invoking: ARM C Compiler 5'
+armcc -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\CoreSupport" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\DeviceSupport" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\DeviceSupport\Startup" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\inc" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\lcd_lib" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\src" -O0 --cpu=cortex-m3 -g -c -o "sound.o" "../sound.c"
+'Finished building: ../sound.c'
+' '
+'Building file: ../touchSensor.c'
+'Invoking: ARM C Compiler 5'
+armcc -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\CoreSupport" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\DeviceSupport" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\CMSIS\DeviceSupport\Startup" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\inc" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\lcd_lib" -I"C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\Libraries\STM32F10x_StdPeriph_Driver_v3.5\src" -O0 --cpu=cortex-m3 -g -c -o "touchSensor.o" "../touchSensor.c"
+'Finished building: ../touchSensor.c'
+' '
+'Building target: hw_team08.axf'
+'Invoking: ARM Linker 5'
+armlink --entry=main --cpu=cortex-m3 --scatter="C:\Users\hw_8\Documents\DS-5 Workspace\hw_team08\stm32-test.sct" --info=sizes -o "hw_team08.axf"  ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/misc.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_adc.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_bkp.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_can.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_cec.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_crc.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_dac.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_dbgmcu.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_dma.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_exti.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_flash.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_fsmc.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_gpio.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_i2c.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_iwdg.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_pwr.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_rcc.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_rtc.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_sdio.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_spi.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_tim.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_usart.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/src/stm32f10x_wwdg.o  ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/lcd_lib/Touch.o ./Libraries/STM32F10x_StdPeriph_Driver_v3.5/lcd_lib/lcd.o  ./Libraries/CMSIS/DeviceSupport/Startup/startup_stm32f10x_cl.o  ./Libraries/CMSIS/DeviceSupport/system_stm32f10x.o  ./Libraries/CMSIS/CoreSupport/core_cm3.o  ./bluetooth.o ./init.o ./lcdInit.o ./main.o ./pressureSensor.o ./sound.o ./touchSensor.o   
+Error: L6200E: Symbol SetSysClock multiply defined (by main.o and init.o).
+Error: L6200E: Symbol SysInit multiply defined (by main.o and init.o).
+Error: L6200E: Symbol defaultSystemInit multiply defined (by main.o and init.o).
+Error: L6200E: Symbol TOUCH_A multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol TOUCH_B multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol TOUCH_C multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol TOUCH_D multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol TOUCH_E multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol TOUCH_F multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol TOUCH_G multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol PRESSURE_a multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol PRESSURE_b multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol PRESSURE_c multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol PRESSURE_d multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol PRESSURE_e multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol PRESSURE_f multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol PRESSURE_g multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol syllable multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol get_GPIO_Setting_Data multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol GPIO_touch_init multiply defined (by touchSensor.o and main.o).
+Error: L6200E: Symbol getPressurePinSrc multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol get_pressure_EXTI_Line multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol get_pressure_EXIT_IRQn multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol get_pressure_GPIO_PinSource multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol get_pressure_GPIO_TypeDef multiply defined (by pressureSensor.o and main.o).
+Error: L6200E: Symbol GPIO_pressure_init multiply defined (by pressureSensor.o and main.o).
+Finished: 0 information, 0 warning and 26 error messages.
+make: *** [hw_team08.axf] Error 1
+
+19:45:16 Build Finished (took 969ms)
+

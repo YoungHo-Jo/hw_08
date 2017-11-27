@@ -1,0 +1,165 @@
+/*
+ * sound.c
+ *
+ *  Created on: 2017. 11. 27.
+ *      Author: hw_8
+ */
+
+
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_exti.h".h"
+const uint16_t TOUCH_A = GPIO_Pin_0;
+const uint16_t TOUCH_B = GPIO_Pin_0;
+const uint16_t TOUCH_C = GPIO_Pin_0;
+const uint16_t TOUCH_D = GPIO_Pin_0;
+const uint16_t TOUCH_E = GPIO_Pin_0;
+const uint16_t TOUCH_F = GPIO_Pin_0;
+const uint16_t TOUCH_G = GPIO_Pin_0;
+
+
+/**
+ * Returns GPIO_PinSource according to the paramter GPIO_Pin
+ */
+uint8_t getTouchPinSrc(uint16_t touchGPIO) {
+    switch(touchGPIO) {
+        case TOUCH_A:
+            return GPIO_PinSource0;
+        case TOUCH_B:
+            return GPIO_PinSource0;
+        case TOUCH_C:
+            return GPIO_PinSource0;
+        case TOUCH_D:
+            return GPIO_PinSource0;
+        case TOUCH_E:
+            return GPIO_PinSource0;
+        case TOUCH_F:
+            return GPIO_PinSource0;
+        case TOUCH_G:
+            return GPIO_PinSource0;
+    }
+}
+
+
+/**
+ * Returns EXTI_Line according to the paramter GPIO_Pin
+ */
+uint32_t get_touch_EXTI_Line(uint16_t touchGPIO) {
+    switch(touchGPIO) {
+        case TOUCH_A:
+            return EXTI_;
+        case TOUCH_B:
+            return EXTI_Line0;
+        case TOUCH_C:
+            return EXTI_Line0;
+        case TOUCH_D:
+            return EXTI_Line0;
+        case TOUCH_E:
+            return EXTI_Line0;
+        case TOUCH_F:
+            return EXTI_Line0;
+        case TOUCH_G:
+            return EXTI_Line0;
+    }
+}
+
+/**
+ * Returns EXTI_IRQn according to the paramter GPIO_Pin
+ */
+uint32_t get_touch_EXIT_IRQn(uint16_t touchGPIO) {
+    switch(touchGPIO) {
+        case TOUCH_A:
+            return EXTI0_IRQn;
+        case TOUCH_B:
+            return EXTI0_IRQn;
+        case TOUCH_C:
+            return EXTI0_IRQn;
+        case TOUCH_D:
+            return EXTI0_IRQn;
+        case TOUCH_E:
+            return EXTI0_IRQn;
+        case TOUCH_F:
+            return EXTI0_IRQn;
+        case TOUCH_G:
+            return EXTI0_IRQn;
+    }
+}
+
+/**
+ * Returns GPIO_PinSource according to the parameter GPIO_pin
+ *
+ */
+uint8_t get_touch_GPIO_PinSource(uint16_t touchGPIO) {
+    switch(touchGPIO) {
+        case TOUCH_A:
+            return GPIO_PortSourceGPIOA;
+        case TOUCH_B:
+            return GPIO_PortSourceGPIOA;
+        case TOUCH_C:
+            return GPIO_PortSourceGPIOA;
+        case TOUCH_D:
+            return GPIO_PortSourceGPIOA;
+        case TOUCH_E:
+            return GPIO_PortSourceGPIOA;
+        case TOUCH_F:
+            return GPIO_PortSourceGPIOA;
+        case TOUCH_G:
+            return GPIO_PortSourceGPIOA;
+    }
+}
+
+/**
+ * Returns GPIO_typeDef according to the parameter GPIO_Pin
+ *
+ */
+ GPIO_TypeDef* get_touch_GPIO_TypeDef(uint16_t touchGPIO) {
+    switch(touchGPIO) {
+        case TOUCH_A:
+            return GPIOA;
+        case TOUCH_B:
+            return GPIOA;
+        case TOUCH_C:
+            return GPIOA;
+        case TOUCH_D:
+            return GPIOA;
+        case TOUCH_E:
+            return GPIOA;
+        case TOUCH_F:
+            return GPIOA;
+        case TOUCH_G:
+            return GPIOA;
+    }
+ }
+
+/**
+ * Sets GPIO Sensor
+ *
+ *
+ */
+void GPIO_touch_init(GPIO_TypeDef* GPIOx, uint16_t pin) {
+	GPIO_InitTypeDef GPIO_InitStructure;
+	EXTI_InitTypeDef EXTI_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	GPIO_InitStructure.GPIO_Pin = pin; // do
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_Init(get_touch_GPIO_TypeDef(pin), &GPIO_InitStructure);
+	GPIO_EXTILineConfig(get_touch_GPIO_PinSource(pin), getTouchPinSrc(pin));
+
+	EXTI_InitStructure.EXTI_Line = get_touch_EXTI_Line(pin);
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStructure);
+
+	NVIC_InitStructure.NVIC_IRQChannel = get_touch_EXIT_IRQn(pin);
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+}
+
+
+
+
+

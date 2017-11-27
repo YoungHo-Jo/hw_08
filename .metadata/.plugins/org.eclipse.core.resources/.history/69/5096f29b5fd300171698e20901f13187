@@ -1,0 +1,20 @@
+/*
+ * pressureSensor.c
+ *
+ *  Created on: 2017. 11. 27.
+ *      Author: hw_8
+ */
+
+
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_adc.h"
+
+const uint16_t PRESURE_A = GPIO_Pin_0;
+const uint16_t PRESURE_B = GPIO_Pin_0;
+const uint16_t PRESURE_C = GPIO_Pin_0;
+const uint16_t PRESURE_D = GPIO_Pin_0;
+const uint16_t PRESURE_E = GPIO_Pin_0;
+const uint16_t PRESURE_F = GPIO_Pin_0;
+const uint16_t PRESURE_G = GPIO_Pin_0;
+
+

@@ -1,0 +1,4 @@
+#Mon Nov 06 18:47:36 KST 2017
+options.itm.itm=false
+options.coreTrace.cortexM3coreTrace=false
+options.trace.traceCapture=none

@@ -1,0 +1,342 @@
+#include <misc.h>
+#include "stm32f10x.h"
+#include "stm32f10x_exti.h"
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_rcc.h"
+#include "stm32f10x_usart.h"
+
+void Delay(volatile unsigned int time) {
+   for (; time > 0; time--) {
+   }
+}
+
+void SetSysClock(void)
+
+{
+
+   volatile uint32_t StartUpCounter = 0, HSEStatus = 0;
+
+   /* SYSCLK, HCLK, PCLK2 and PCLK1 configuration ---------------------------*/
+   /* Enable HSE */
+   RCC->CR |= ((uint32_t)RCC_CR_HSEON);
+
+
+   /* Wait till HSE is ready and if Time out is reached exit */
+   do
+   {
+      HSEStatus = RCC->CR & RCC_CR_HSERDY;
+      StartUpCounter++;
+   } while((HSEStatus == 0) && (StartUpCounter != HSE_STARTUP_TIMEOUT));
+
+   if ((RCC->CR & RCC_CR_HSERDY) != RESET)
+   {
+      HSEStatus = (uint32_t)0x01;
+   }
+   else
+   {
+      HSEStatus = (uint32_t)0x00;
+   }
+
+   if (HSEStatus == (uint32_t)0x01)
+   {
+      /* Enable Prefetch Buffer */
+      FLASH->ACR |= FLASH_ACR_PRFTBE;
+
+      /* Flash 0 wait state */
+      FLASH->ACR &= (uint32_t)((uint32_t)~FLASH_ACR_LATENCY);
+      FLASH->ACR |= (uint32_t)FLASH_ACR_LATENCY_0;
+
+      /* HCLK = SYSCLK */
+      RCC->CFGR |= (uint32_t)RCC_CFGR_HPRE_DIV1;
+
+      /* PCLK2 = HCLK */
+      RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE2_DIV2;
+
+      /* PCLK1 = HCLK */
+      RCC->CFGR |= (uint32_t)RCC_CFGR_PPRE1_DIV1;
+
+      /* Configure PLLs ------------------------------------------------------*/
+
+      /* PLL configuration: PLLCLK = ???? */
+      RCC->CFGR &= (uint32_t)~(RCC_CFGR_PLLXTPRE | RCC_CFGR_PLLSRC | RCC_CFGR_PLLMULL);
+      RCC->CFGR |= (uint32_t)(RCC_CFGR_PLLXTPRE_PREDIV1 | RCC_CFGR_PLLSRC_PREDIV1 | RCC_CFGR_PLLMULL4);
+
+      /* PLL2 configuration: PLL2CLK = ???? */
+      /* PREDIV1 configuration: PREDIV1CLK = ???? */
+      RCC->CFGR2 &= (uint32_t)~(RCC_CFGR2_PREDIV2 | RCC_CFGR2_PLL2MUL | RCC_CFGR2_PREDIV1 | RCC_CFGR2_PREDIV1SRC);
+      RCC->CFGR2 |= (uint32_t)(RCC_CFGR2_PREDIV2_DIV5 | RCC_CFGR2_PLL2MUL8 | RCC_CFGR2_PREDIV1SRC_PLL2 | RCC_CFGR2_PREDIV1_DIV8);
+
+      /* Enable PLL2 */
+      RCC->CR |= RCC_CR_PLL2ON;
+      /* Wait till PLL2 is ready */
+      while((RCC->CR & RCC_CR_PLL2RDY) == 0)
+      {
+
+      }
+
+      /* Enable PLL */
+      RCC->CR |= RCC_CR_PLLON;
+
+      /* Wait till PLL is ready */
+      while((RCC->CR & RCC_CR_PLLRDY) == 0)
+      {
+
+      }
+
+      /* Select PLL as system clock source */
+      RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+      RCC->CFGR |= (uint32_t)RCC_CFGR_SW_PLL;
+
+      /* Wait till PLL is used as system clock source */
+      while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != (uint32_t)0x08)
+      {
+
+      }
+
+   }
+
+   else
+   { /* If HSE fails to start-up, the application will have wrong clock
+         configuration. User can add here some code to deal with this error */
+   }
+
+}
+
+void turnOn() {
+	GPIO_SetBits(GPIOD, GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_7);
+	Delay(300000);
+	GPIO_ResetBits(GPIOD, GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_7);
+	Delay(300000);
+	GPIO_SetBits(GPIOD, GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_7);
+	Delay(300000);
+	GPIO_ResetBits(GPIOD, GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_7);
+	Delay(300000);
+}
+
+
+void SerialSendChar(uint8_t c)
+{
+  USART_SendData(USART1, c);
+  while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+}
+
+void SerialSendChar2(uint8_t c)
+{
+  USART_SendData(USART2, c);
+  while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+}
+
+void USART1_IRQHandler(void) { // 컴퓨터->보드->블투스
+	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+		uint16_t get;
+		get = USART_ReceiveData(USART1);
+
+		//블루투스로 보내는 코드 작성
+		SerialSendChar2(get);
+//		turnOn();
+		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+	}
+	USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+}
+
+void USART2_IRQHandler(void) {  //블투 ->보드 -> 컴퓨터
+	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
+		uint16_t get;
+		get = USART_ReceiveData(USART2);
+
+//		turnOn();
+		SerialSendChar(get);
+		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+	}
+	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+}
+
+
+
+
+void EXTI15_10_IRQHandler(void) {
+	if (EXTI_GetFlagStatus(EXTI_Line11) != RESET) {
+		GPIO_SetBits(GPIOD, GPIO_Pin_2);
+		Delay(500000);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_2);
+		Delay(500000);
+		GPIO_SetBits(GPIOD, GPIO_Pin_3);
+		Delay(500000);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_3);
+		Delay(500000);
+		GPIO_SetBits(GPIOD, GPIO_Pin_4);
+		Delay(500000);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_4);
+		Delay(500000);
+		GPIO_SetBits(GPIOD, GPIO_Pin_7);
+		Delay(500000);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_7);
+		Delay(500000);
+		EXTI_ClearITPendingBit(EXTI_Line11); // 요기
+	}
+	else if (EXTI_GetFlagStatus(EXTI_Line12) != RESET) {
+		GPIO_SetBits(GPIOD, GPIO_Pin_2);
+		GPIO_SetBits(GPIOD, GPIO_Pin_3);
+		GPIO_SetBits(GPIOD, GPIO_Pin_4);
+		GPIO_SetBits(GPIOD, GPIO_Pin_7);
+		Delay(500000);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_2);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_3);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_4);
+		GPIO_ResetBits(GPIOD, GPIO_Pin_7);
+		SerialSendChar('T');
+		SerialSendChar('H');
+		SerialSendChar('U');
+		SerialSendChar('_');
+		SerialSendChar('t');
+		SerialSendChar('e');
+		SerialSendChar('a');
+		SerialSendChar('m');
+		SerialSendChar('8');
+		SerialSendChar('_');
+		SerialSendChar('U');
+		SerialSendChar('A');
+		SerialSendChar('R');
+		SerialSendChar('T');
+		SerialSendChar('_');
+		SerialSendChar('T');
+		SerialSendChar('E');
+		SerialSendChar('S');
+		SerialSendChar('T');
+		EXTI_ClearITPendingBit(EXTI_Line12); // 요기
+	}
+}
+
+int main() {
+	GPIO_InitTypeDef GPIO_A_RX,GPIO_A_TX, GPIO_D_LED, GPIO_D_BTN;
+	USART_InitTypeDef usart,usart2;
+	EXTI_InitTypeDef exti_usart_rx, exti_gpiod_11, exti_gpiod_12;
+	NVIC_InitTypeDef nvic_usart_rx,nvic_usart_rx2, nvic_gpiod_11, nvic_gpiod_12;
+
+	RCC_DeInit();
+//	SetSysClock();	//system clock 설정
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1 | RCC_APB2Periph_AFIO, ENABLE);
+							//USART1 TX RX          //USART1			//External Interrupt
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+							//USART2
+
+	//USART1 TX(PA9)
+	GPIO_A_TX.GPIO_Pin = GPIO_Pin_9;
+	GPIO_A_TX.GPIO_Mode = GPIO_Mode_AF_PP;	//Alternate Function push_pull (1000)
+	GPIO_A_TX.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_A_TX);
+
+	//USART1 RX(PA10)
+	GPIO_A_RX.GPIO_Pin = GPIO_Pin_10;
+	GPIO_A_RX.GPIO_Mode = GPIO_Mode_IN_FLOATING;	//Input
+	GPIO_Init(GPIOA, &GPIO_A_RX);
+
+	//USART2 TX(PA2)
+	GPIO_A_TX.GPIO_Pin = GPIO_Pin_2;
+	GPIO_A_TX.GPIO_Mode = GPIO_Mode_AF_PP;	//Alternate Function push_pull (1000)
+	GPIO_A_TX.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_A_TX);
+
+	//USART2 RX(PA3)
+	GPIO_A_RX.GPIO_Pin = GPIO_Pin_3;
+	GPIO_A_RX.GPIO_Mode = GPIO_Mode_IN_FLOATING;	//Input
+	GPIO_Init(GPIOA, &GPIO_A_RX);
+
+
+	//LED(PD2, PD3, PD4, PD5)
+	GPIO_D_LED.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_D_LED.GPIO_Pin = (GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_7);
+	GPIO_D_LED.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOD, &GPIO_D_LED);
+
+	//Button(PD11, PD12)
+	GPIO_D_BTN.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_D_BTN.GPIO_Pin = (GPIO_Pin_11);
+	GPIO_D_BTN.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOD, &GPIO_D_BTN);
+
+	//Button(PD12)
+	GPIO_D_BTN.GPIO_Mode = GPIO_Mode_IPD;
+	GPIO_D_BTN.GPIO_Pin = (GPIO_Pin_12);
+	GPIO_D_BTN.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOD, &GPIO_D_BTN);
+
+	//Interrupt
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource11); // Button(PD11)
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource12); // Button(PD12)
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource10); // USART_RX(PA10)
+
+	//Init Usart
+	usart.USART_BaudRate = 9600;
+	usart.USART_WordLength = USART_WordLength_9b;
+	usart.USART_Mode = USART_Mode_Tx | USART_Mode_Rx ;
+	usart.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	usart.USART_Parity = USART_Parity_Even;
+	usart.USART_StopBits = USART_StopBits_1;
+	USART_Init(USART1, &usart);
+	USART_Cmd(USART1, ENABLE);
+
+	//Init Usart2
+	usart2.USART_BaudRate = 9600;
+	usart2.USART_WordLength = USART_WordLength_9b;
+	usart2.USART_Mode = USART_Mode_Tx | USART_Mode_Rx ;
+	usart2.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	usart2.USART_Parity = USART_Parity_Even;
+	usart2.USART_StopBits = USART_StopBits_1;
+	USART_Init(USART2, &usart2);
+	USART_Cmd(USART2, ENABLE);
+
+	//Interrupt Connection
+	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+
+
+	//Open External Interrupt Line10 == RX(PA10)
+	exti_usart_rx.EXTI_Line = EXTI_Line10;
+	exti_usart_rx.EXTI_LineCmd = ENABLE;
+	exti_usart_rx.EXTI_Mode = EXTI_Mode_Interrupt;
+	exti_usart_rx.EXTI_Trigger = EXTI_Trigger_Falling;  //start bit == 0 1->0
+	EXTI_Init(&exti_usart_rx);
+
+	exti_gpiod_11.EXTI_Line = EXTI_Line11;	// BTN
+	exti_gpiod_11.EXTI_LineCmd = ENABLE;
+	exti_gpiod_11.EXTI_Mode = EXTI_Mode_Interrupt;
+	exti_gpiod_11.EXTI_Trigger = EXTI_Trigger_Rising;
+	EXTI_Init(&exti_gpiod_11);
+
+	exti_gpiod_12.EXTI_Line = EXTI_Line12;	// BTN
+	exti_gpiod_12.EXTI_LineCmd = ENABLE;
+	exti_gpiod_12.EXTI_Mode = EXTI_Mode_Interrupt;
+	exti_gpiod_12.EXTI_Trigger = EXTI_Trigger_Rising;
+	EXTI_Init(&exti_gpiod_12);
+
+	//Priority
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+	nvic_usart_rx.NVIC_IRQChannel = USART1_IRQn;		//USART1 global Interrupt
+	nvic_usart_rx.NVIC_IRQChannelCmd = ENABLE;
+	nvic_usart_rx.NVIC_IRQChannelPreemptionPriority = 0;
+	nvic_usart_rx.NVIC_IRQChannelSubPriority = 0;
+	NVIC_Init(&nvic_usart_rx);
+
+	nvic_usart_rx2.NVIC_IRQChannel = USART2_IRQn;
+	nvic_usart_rx2.NVIC_IRQChannelCmd = ENABLE;
+	nvic_usart_rx2.NVIC_IRQChannelPreemptionPriority = 0;
+	nvic_usart_rx2.NVIC_IRQChannelSubPriority = 0;
+	NVIC_Init(&nvic_usart_rx2);
+/*
+	nvic_gpiod_11.NVIC_IRQChannel = EXTI15_10_IRQn; 	//External Line[15:10] Interrupts
+	nvic_gpiod_11.NVIC_IRQChannelCmd = ENABLE;
+	nvic_gpiod_11.NVIC_IRQChannelPreemptionPriority = 1;
+	nvic_gpiod_11.NVIC_IRQChannelSubPriority =0;
+	NVIC_Init(&nvic_gpiod_11);
+
+	nvic_gpiod_11.NVIC_IRQChannel = EXTI15_10_IRQn; 	//External Line[15:10] Interrupts
+	nvic_gpiod_11.NVIC_IRQChannelCmd = ENABLE;
+	nvic_gpiod_11.NVIC_IRQChannelPreemptionPriority = 2;
+	nvic_gpiod_11.NVIC_IRQChannelSubPriority =0;
+	NVIC_Init(&nvic_gpiod_12);
+*/
+	while (1) {
+
+	}
+}

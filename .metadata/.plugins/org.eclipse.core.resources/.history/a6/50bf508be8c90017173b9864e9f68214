@@ -1,0 +1,107 @@
+#include "stm32f10x_rcc.h"
+#include "stm32f10x_gpio.h"
+#include "stm32f10x_usart.h"
+#include "stm32f10x_adc.h"
+#include "stm32f10x_dma.h"
+#include "misc.h"
+#include "lcd.h"
+#include "Touch.h"
+#define ADC1_DR_Address    ((uint32_t)0x4001244C)
+
+void ADC1_2_IRQHandler() {
+	int AD_Value;
+	while(ADC_GetFlagStatus(ADC1, 0x2) == RESET);
+	AD_Value = ADC_GetConversionValue(ADC1);
+
+	LCD_ShowNum(100,50,AD_Value,160,BLACK,WHITE);
+	delay(10000000);
+}
+
+void NVICSetup() {
+	 NVIC_InitTypeDef NVIC_InitStructure;
+	 NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
+	 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	 NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	 NVIC_Init(&NVIC_InitStructure);
+}
+
+void ADCSetup() { // ADC 설정 함수
+	ADC_InitTypeDef ADC_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+
+	// ADC 채널 1번,2번 핀 설정
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+	ADC_InitStructure.ADC_ScanConvMode = ENABLE;
+	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+	ADC_InitStructure.ADC_NbrOfChannel = 2; // 채널 2개 사용
+	ADC_Init(ADC1, &ADC_InitStructure);
+
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, 	ADC_SampleTime_55Cycles5);
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_11, 2, 	ADC_SampleTime_55Cycles5);
+
+	ADC_ITConfig(ADC1, ADC_IT_EOC, ENABLE);
+	ADC_DMACmd(ADC1, ENABLE);
+	ADC_Cmd(ADC1, ENABLE);
+	ADC_ResetCalibration(ADC1);
+
+	while(ADC_GetResetCalibrationStatus(ADC1));
+
+	ADC_StartCalibration(ADC1);
+	while(ADC_GetCalibrationStatus(ADC1));
+
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+}
+
+void DMASetup() { // DMA 설정 함수
+	DMA_InitTypeDef DMA_InitStructure;
+
+	/* DMA1 channel1 configuration --------------------*/
+	DMA_DeInit(DMA1_Channel1);
+	DMA_InitStructure.DMA_PeripheralBaseAddr = ADC1_DR_Address;
+	DMA_InitStructure.DMA_MemoryBaseAddr =	 (uint32_t)ADC_DualConvertedValueTab;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+	DMA_InitStructure.DMA_BufferSize = 2; // 버퍼 사이즈 2
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	// 메모리 증가 Enable
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	// DataSize Word로 설정
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
+	// DataSize Word로 설정
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	DMA_Init(DMA1_Channel1, &DMA_InitStructure);
+
+	/* Enable DMA1 channel1 */
+	DMA_Cmd(DMA1_Channel1, ENABLE);
+}
+
+
+
+int main(){
+
+	SystemInit();
+	LCD_Init();
+	LCD_Clear(WHITE);
+	ADCSetup();
+	DMASetup();
+	NVICSetup();
+
+
+	while(1) {
+
+	}
+}
+
+
