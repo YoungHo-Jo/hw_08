@@ -1,9 +1,10 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_usart.h"
+#include "misc.h"
 #define USART_RX_BUFFER_SIZE 20
 
 const uint16_t USART_TX = GPIO_Pin_2;
-const uint16_t USART_RX = GPIO_pin_3;
+const uint16_t USART_RX = GPIO_Pin_3;
 const GPIO_TypeDef* USART_GPIO = GPIOA;
 char USART_RX_Buffer[USART_RX_BUFFER_SIZE];
 uint16_t USART_RX_Counter = 0;
@@ -54,22 +55,30 @@ void USART2_Run() {
 
 void USART2_IRQHandler(void) {
 	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
+        // receive a char from sender
         char c = USART_ReceiveData(USART2);
 
-		uint16_t i = 0;
 		if (c == '\r') {
+            uint16_t i = 0;
 			for(i = 0; i < USART_RX_Counter; i++) {
+                // send content of the buffer
 				USART_SendData(USART2, USART_RX_Buffer[i]);
 				while(!USART_GetFlagStatus(USART2, USART_FLAG_TXE));
 			}
+            // rest the counter of the buffer
 			USART_RX_Counter = 0;
 
-			USART_SendData(USART1, '\n');
-			while(!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
+			USART_SendData(USART2, '\n');
+			while(!USART_GetFlagStatus(USART2, USART_FLAG_TXE));
 		} else if (USART_RX_Counter < USART_RX_BUFFER_SIZE){
-			USART_RX_Buffer[USART_RX_Counter] = (uint16_t)c;
+            // store to the buffer
+			USART_RX_Buffer[USART_RX_Counter] = (uint16_t) c;
+            // increase the counter of the buffer
 			USART_RX_Counter++;
-			while(!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
+			while(!USART_GetFlagStatus(USART2, USART_FLAG_TXE));
 		}
+
+        // clear USART2 interrupt bit
+        USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 	}
 }
