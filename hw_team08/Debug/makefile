@@ -13,6 +13,7 @@ RM := clean
 -include Libraries/CMSIS/DeviceSupport/Startup/subdir.mk
 -include Libraries/CMSIS/DeviceSupport/subdir.mk
 -include Libraries/CMSIS/CoreSupport/subdir.mk
+-include Libraries/subdir.mk
 -include subdir.mk
 -include objects.mk
 

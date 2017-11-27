@@ -7,9 +7,9 @@
 
 
 #include "misc.h"
+#include "init.h"
 
-void SysInit();
-void SetSysClock();
+
 void defaultSystemInit() {
     SysInit();
     SetSysClock();

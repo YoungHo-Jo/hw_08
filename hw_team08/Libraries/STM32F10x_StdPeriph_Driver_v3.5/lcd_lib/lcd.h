@@ -36,6 +36,7 @@ void LCD_DrawRectangle(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yen
 void LCD_DrawPoint(uint16_t xsta, uint16_t ysta);
 void LCD_WindowMax (unsigned int x,unsigned int y,unsigned int x_end,unsigned int y_end);
 void Delay_10ms(int time);
+void LCD_ShowNum(u8 x,u8 y,u32 num,u8 len, u16 PenColor, u16 BackColor);
 void LCD_ShowString(u16 x0, u16 y0, u8 *pcStr, u16 PenColor, u16 BackColor);
 
 void LCD_Configuration(void);

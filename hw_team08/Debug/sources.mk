@@ -19,6 +19,7 @@ EXECUTABLES :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 . \
+Libraries \
 Libraries/STM32F10x_StdPeriph_Driver_v3.5/src \
 Libraries/STM32F10x_StdPeriph_Driver_v3.5/lcd_lib \
 Libraries/CMSIS/DeviceSupport \
