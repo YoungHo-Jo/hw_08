@@ -4,14 +4,7 @@
  *  Created on: 2017. 11. 27.
  *      Author: hw_8
  */
-#include "misc.h"
-#include "stm32f10x_gpio.h"
-#include "stm32f10x_exti.h"
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_tim.h"
 #include "touchSensor.h"
-#include "lcd.h"
-
 int color[12] = { WHITE, CYAN, BLUE, RED, MAGENTA, LGRAY, GREEN, YELLOW, BROWN,
 		BRRED, GRAY };
 

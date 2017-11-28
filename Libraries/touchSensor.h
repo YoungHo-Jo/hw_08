@@ -4,12 +4,15 @@
  *  Created on: 2017. 11. 27.
  *      Author: hw_8
  */
+
+#ifndef __TOUCH_SENSOR_H__
+#define __TOUCH_SENSOR_H__
+
 #include "misc.h"
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_exti.h"
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_tim.h"
-#include "stm32f10x_gpio.h"
 #include "lcd.h"
 
 typedef struct __GPIO_setting_data {
@@ -31,6 +34,7 @@ void GPIO_touch_init_all(void);
 void TIM2_IRQHandler(void);
 void init_Timer2(void);
 
+#endif
 
 
 

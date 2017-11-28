@@ -1,16 +1,4 @@
-#include "stm32f10x_gpio.h"
-#include "stm32f10x_adc.h"
-#include "stm32f10x_exti.h"
-#include "misc.h"
-
-const uint16_t PRESSURE_a = GPIO_Pin_0;
-const uint16_t PRESSURE_b = GPIO_Pin_1;
-const uint16_t PRESSURE_c = GPIO_Pin_2;
-const uint16_t PRESSURE_d = GPIO_Pin_3;
-const uint16_t PRESSURE_e = GPIO_Pin_4;
-const uint16_t PRESSURE_f = GPIO_Pin_5;
-const uint16_t PRESSURE_g = GPIO_Pin_6;
-
+#include "pressureSensor.h"
 
 /**
  * Returns GPIO_PinSource according to the paramter GPIO_Pin

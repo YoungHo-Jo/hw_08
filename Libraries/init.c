@@ -5,10 +5,7 @@
  *      Author: hw_8
  */
 
-
-#include "misc.h"
 #include "init.h"
-
 
 void defaultSystemInit() {
     SysInit();
