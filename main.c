@@ -7,7 +7,6 @@
 // flash load "./hw_team08/Debug/hw_team08.axf"
 // flash load "./hw_team08/flashClear.axf"
 
-
 int main(void) {
 	// set system and set clock
 		defaultSystemInit();
