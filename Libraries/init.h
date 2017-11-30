@@ -9,6 +9,9 @@
 
 #include "misc.h"
 
+#define TRUE 1
+#define FALSE 0
+
 void SysInit(void);
 void SetSysClock(void);
 void defaultSystemInit(void);
