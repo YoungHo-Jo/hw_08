@@ -43,6 +43,8 @@ void Terminal_init() {
 
 	nvic_init_struct.NVIC_IRQChannel = USART1_IRQn;
 	nvic_init_struct.NVIC_IRQChannelCmd = ENABLE;
+	nvic_init_struct.NVIC_IRQChannelPreemptionPriority = 0;
+	nvic_init_struct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_Init(&nvic_init_struct);
 
 	USART_Init(USART1, &usart1_init_struct);
@@ -56,25 +58,35 @@ void USART1_IRQHandler(void) {
 	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
 		char c = USART_ReceiveData(USART1);
 
-		int i;
-		if (c == '\r') {
-			for (i = 0; i < ts.RX_Counter; i++) {
-				USART_SendData(USART1, ts.RX_Buffer[i]);
-				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
-			}
-			ts.RX_Counter = 0;
-			i = 0;
+//		int i;
+//		if (c == '\r' || c == '\n') {
+//			for (i = 0; i < ts.RX_Counter; i++) {
+//				USART_SendData(USART2, ts.RX_Buffer[i]);
+//				while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE))
+//					;
+//			}
+//			ts.RX_Counter = 0;
+//			i = 0;
+//
+//			USART_SendData(USART1, '-');
+//			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE))
+//				;
+//			ts.readyToSend = TRUE;
+//		} else if (ts.RX_Counter < TERMINAL_RX_BUFFER_SIZE) {
+//			ts.RX_Buffer[ts.RX_Counter] = (uint16_t) c;
+//			ts.RX_Counter++;
+//			USART_SendData(USART1, c);
+//			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
+//
+//		}
 
-			USART_SendData(USART1, '\n');
-			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
-			USART_SendData(USART1, '\n');
-			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
-		} else if (ts.RX_Counter < TERMINAL_RX_BUFFER_SIZE) {
-			ts.RX_Buffer[ts.RX_Counter] = (uint16_t) c;
-			ts.RX_Counter++;
-			USART_SendData(USART1, c);
-			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
-		}
+
+		USART_SendData(USART1, c);
+		while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
+
+		USART_SendData(USART2, c);
+		while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE))
+			;
 
 		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
 	}

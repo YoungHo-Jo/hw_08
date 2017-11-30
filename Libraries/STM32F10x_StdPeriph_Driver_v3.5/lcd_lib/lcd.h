@@ -38,6 +38,7 @@ void LCD_WindowMax (unsigned int x,unsigned int y,unsigned int x_end,unsigned in
 void Delay_10ms(int time);
 void LCD_ShowNum(u8 x,u8 y,u32 num,u8 len, u16 PenColor, u16 BackColor);
 void LCD_ShowString(u16 x0, u16 y0, u8 *pcStr, u16 PenColor, u16 BackColor);
+void LCD_ShowChar(u8 x, u16 y, u8 num, u8 size, u16 PenColor, u16 BackColor);
 
 void LCD_Configuration(void);
 void LCD_FSMCConfiguration(void);
