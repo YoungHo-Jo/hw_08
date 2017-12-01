@@ -50,48 +50,46 @@ void Terminal_init() {
 	USART_Init(USART1, &usart1_init_struct);
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
-void Terminal_IRQHandler(Terminal_Struct* ts) {
+void Terminal_IRQHandler() {
+	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
+			char c = USART_ReceiveData(USART1);
 
+			if (c == '\r' || c == '\n') {
+				Terminal_storeInBuf(c);
+				ts.readyToSend = TRUE;
+			} else if (ts.RX_Counter < TERMINAL_RX_BUFFER_SIZE) {
+				Terminal_storeInBuf(c);
+
+				USART_SendData(USART1, c);
+				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
+			}
+
+			USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+		}
 }
 
 void USART1_IRQHandler(void) {
-	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
-		char c = USART_ReceiveData(USART1);
-
-//		int i;
-//		if (c == '\r' || c == '\n') {
-//			for (i = 0; i < ts.RX_Counter; i++) {
-//				USART_SendData(USART2, ts.RX_Buffer[i]);
-//				while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE))
-//					;
-//			}
-//			ts.RX_Counter = 0;
-//			i = 0;
-//
-//			USART_SendData(USART1, '-');
-//			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE))
-//				;
-//			ts.readyToSend = TRUE;
-//		} else if (ts.RX_Counter < TERMINAL_RX_BUFFER_SIZE) {
-//			ts.RX_Buffer[ts.RX_Counter] = (uint16_t) c;
-//			ts.RX_Counter++;
-//			USART_SendData(USART1, c);
-//			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
-//
-//		}
-
-
-		USART_SendData(USART1, c);
-		while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
-
-		USART_SendData(USART2, c);
-		while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE))
-			;
-
-		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
-	}
+	Terminal_IRQHandler();
 }
 
 void Terminal_Run() {
 	USART_Cmd(USART1, ENABLE);
+}
+
+void Terminal_sendToBT() {
+	if (ts.readyToSend == TRUE) {
+		int i = 0;
+		for (i = 0; i < ts.RX_Counter; i++) {
+			USART_SendData(USART2, ts.RX_Buffer[i]);
+			while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE))
+				;
+		}
+		ts.RX_Counter = 0;
+
+		ts.readyToSend = FALSE;
+	}
+}
+
+void Terminal_storeInBuf(uint16_t c) {
+	ts.RX_Buffer[ts.RX_Counter++] = c;
 }

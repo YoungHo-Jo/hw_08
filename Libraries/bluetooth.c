@@ -1,8 +1,7 @@
 #include "bluetooth.h"
-#include "lcd.h"
+
 BT_Struct bs;
-u8 x = 10;
-u16 y = 10;
+
 void BT_RCC_init() {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
@@ -14,6 +13,7 @@ BT_Struct* BT_Struct_Init() {
 	bs.BT_RX = GPIO_Pin_3;
 	bs.BT_GPIO = GPIOA;
 	bs.BT_RX_Counter = 0;
+	bs.readyToSend = FALSE;
 
 	return &bs;
 }
@@ -42,13 +42,13 @@ void BT_init() {
 	USART2_init_struct.USART_Parity = USART_Parity_No;
 	USART2_init_struct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART2_init_struct.USART_HardwareFlowControl =
-			USART_HardwareFlowControl_None;
+	USART_HardwareFlowControl_None;
 
 	// NVIC init for Interrupt handler
 	NVIC_init_struct.NVIC_IRQChannel = USART2_IRQn;
 	NVIC_init_struct.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_init_struct.NVIC_IRQChannelPreemptionPriority = 10;
-	NVIC_init_struct.NVIC_IRQChannelSubPriority = 10;
+	NVIC_init_struct.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_init_struct.NVIC_IRQChannelSubPriority = 1;
 	NVIC_Init(&NVIC_init_struct);
 
 	USART_Init(USART2, &USART2_init_struct);
@@ -60,37 +60,49 @@ void BT_Run() {
 }
 
 void USART2_IRQHandler() {
-	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
-				// receive a char from sender
-				char c = USART_ReceiveData(USART2);
-
-	//			if (c == '\r' || c == '\n') {
-	//				uint16_t i = 0;
-	//				for (i = 0; i < bs.BT_RX_Counter; i++) {
-	//					// send content of the buffer
-	//					USART_SendData(USART1, bs.BT_RX_Buffer[i]);
-	//					while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
-	//				}
-	//				// rest the counter of the buffer
-	//				bs.BT_RX_Counter = 0;
-	//
-	//			} else if (bs.BT_RX_Counter < USART_RX_BUFFER_SIZE) {
-	//				// store to the buffer
-	//				bs.BT_RX_Buffer[bs.BT_RX_Counter] = (uint16_t) c;
-	//				// increase the counter of the buffer
-	//				bs.BT_RX_Counter++;
-	//				while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE));
-	//			}
-
-				// send to terminal
-				USART_SendData(USART1, c);
-				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
-
-				// clear USART2 interrupt bit
-				USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-			}
+	BT_IRQHandler();
 }
 
 void BT_IRQHandler(void) {
+	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
+		// receive a char from sender
+		uint16_t c = USART_ReceiveData(USART2);
 
+		if (c == '\r' || c == '\n') {
+			BT_storeInBuf(c);
+
+			bs.readyToSend = TRUE;
+		} else if (bs.BT_RX_Counter < USART_RX_BUFFER_SIZE) {
+			BT_storeInBuf(c);
+		}
+
+
+// clear USART2 interrupt bit
+		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+	}
 }
+
+void BT_sendToTerminal() {
+	if (bs.readyToSend == TRUE) {
+		uint16_t i = 0;
+		for (i = 0; i < bs.BT_RX_Counter; i++) {
+			// send content of the buffer
+			USART_SendData(USART1, bs.BT_RX_Buffer[i]);
+			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE))
+				;
+		}
+		// rest the counter of the buffer
+		bs.BT_RX_Counter = 0;
+
+		// reset the flag
+		bs.readyToSend = FALSE;
+	}
+}
+
+void BT_storeInBuf(uint16_t c) {
+	// store to the buffer
+	bs.BT_RX_Buffer[bs.BT_RX_Counter] = c;
+	// increase the counter of the buffer
+	bs.BT_RX_Counter++;
+}
+

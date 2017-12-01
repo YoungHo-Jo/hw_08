@@ -8,7 +8,7 @@
 #include "stm32f10x_usart.h"
 #include "stm32f10x_rcc.h"
 
-#define TERMINAL_RX_BUFFER_SIZE 20
+#define TERMINAL_RX_BUFFER_SIZE 1000
 
 typedef struct {
 	uint16_t TX;
@@ -19,13 +19,16 @@ typedef struct {
 	uint8_t readyToSend;
 } Terminal_Struct;
 
-Terminal_Struct* Terminal_Struct_init();
-void Terminal_Rcc_init();
-void Terminal_init();
-void Terminal_IRQHandler();
+// reserved function in CORTEXT-M3
 void USART1_IRQHandler(void);
 
-void Terminal_Run();
+Terminal_Struct* Terminal_Struct_init(void);
+void Terminal_Rcc_init(void);
+void Terminal_init(void);
+void Terminal_IRQHandler(void);
+void Terminal_Run(void);
 
+void Terminal_sendToBT(void);
+void Terminal_storeInBuf(uint16_t c);
 
 #endif
