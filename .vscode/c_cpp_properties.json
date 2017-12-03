@@ -9,10 +9,10 @@
                 "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
                 "${workspaceRoot}",
                 "${workspaceRoot}/Libraries/STM32F10x_StdPeriph_Driver_v3.5/inc",
-                "${workspaceRoot}/Libraries/STM32F10x_StdPeriph_Driver_v3.5/src",
                 "${workspaceRoot}/Libraries/STM32F10x_StdPeriph_Driver_v3.5/lcd_lib",
                 "${workspaceRoot}/Libraries/CMSIS/CoreSupport",
-                "${workspaceRoot}/Libraries/CMSIS/DeviceSupport"
+                "${workspaceRoot}/Libraries/CMSIS/DeviceSupport",
+                "${workspaceRoot}/Libraries/"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -27,7 +27,8 @@
                     "${workspaceRoot}/Libraries/STM32F10x_StdPeriph_Driver_v3.5/src",
                     "${workspaceRoot}/Libraries/STM32F10x_StdPeriph_Driver_v3.5/lcd_lib",
                     "${workspaceRoot}/Libraries/CMSIS/CoreSupport",
-                    "${workspaceRoot}/Libraries/CMSIS/DeviceSupport"
+                    "${workspaceRoot}/Libraries/CMSIS/DeviceSupport",
+                    "${workspaceRoot}/Libraries/"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
