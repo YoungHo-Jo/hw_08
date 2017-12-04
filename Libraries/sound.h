@@ -20,5 +20,14 @@ void Sound_RCC_init(void);
 void Sound_init(void);
 void Sound_Run(void);
 
+void I2C2_Start(void);
+void I2C2_Send_Byte(uint8_t b);
+uint8_t I2C2_wait_ACK(void);
+void I2C2_Stop(void);
+
+
+
+
+
 #endif
 

@@ -31,7 +31,6 @@ void Sound_init(void) {
 	I2C2_init_struct.I2C_ClockSpeed = 20000;
 	I2C_Init(I2C2, &I2C2_init_struct);
 
-
 }
 
 void Sound_Run(void) {
