@@ -16,7 +16,7 @@
 // All rights reserved
 ////////////////////////////////////////////////// ////////////////////////////////
 
-#define WM8978_ADDR 0X1A // WM8978 device address, fixed as 0X1A
+#define WM8978_ADDR 0X1A // WM8978 device address, fixed as 0X1A 0011010
 
 #define EQ1_80Hz 0X00
 #define EQ1_105Hz 0X01

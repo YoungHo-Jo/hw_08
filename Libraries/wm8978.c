@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////// ////////////////////////////////
 
 // WM8978 register value buffer (a total of 58 registers, 0 ~ 57), occupying 116 bytes of memory
-// Because the IIC operation of WM8978 does not support read operations, all register values 占쎈뿢占쎈븛re saved locally
+// Because the IIC operation of WM8978 does not support read operations, all register values �뜝�럥肉℡뜝�럥釉썄e saved locally
 // When writing WM8978 register, it synchronously updates to the local register value. When reading the register, it directly returns the register value saved locally.
 // Note: The register value of WM8978 is 9 bits, so use uint16_t to store.
 static uint16_t WM8978_REGVAL_TBL[58] = { 0X0000, 0X0000, 0X0000, 0X0000,
@@ -89,23 +89,24 @@ uint8_t WM8978_Write_Reg(uint8_t reg, uint16_t val) {
 	IIC_Start();
 	IIC_Send_Byte((WM8978_ADDR << 1) | 0); // Send Device Address + Write Command
 	if (IIC_Wait_Ack ())
-	�삵샍�삵샍�삵샍�삵샍printf ("% s,% d \ n", __ FUNCTION __, 1); // wait for reply (successful? / failed?)
-	�삵샍�삵샍IIC_Send_Byte((reg << 1) | ((val >> 8) & 0X01)); // write register address + the most significant bit of data
+	占쎌궢�깓占쎌궢�깓占쎌궢�깓占쎌궢�깓printf ("% s,% d \ n", __ FUNCTION __, 1); // wait for reply (successful? / failed?)
+	占쎌궢�깓占쎌궢�깓IIC_Send_Byte((reg << 1) | ((val >> 8) & 0X01)); // write register address + the most significant bit of data
 	if (IIC_Wait_Ack ())
-	�삵샍�삵샍�삵샍�삵샍printf ("% s,% d \ n", __ FUNCTION __, 2); // wait for reply (successful? / failed?)
+	占쎌궢�깓占쎌궢�깓占쎌궢�깓占쎌궢�깓printf ("% s,% d \ n", __ FUNCTION __, 2); // wait for reply (successful? / failed?)
 	IIC_Send_Byte(val & 0xFF); // Send data
 	if (IIC_Wait_Ack ())
-	�삵샍�삵샍�삵샍�삵샍printf ("% s,% d \ n", __FUNCTION __, 3); // wait for reply (successful? / failed?)
-	�삵샍�삵샍IIC_Stop();
+	占쎌궢�깓占쎌궢�깓占쎌궢�깓占쎌궢�깓printf ("% s,% d \ n", __FUNCTION __, 3); // wait for reply (successful? / failed?)
+	占쎌궢�깓占쎌궢�깓IIC_Stop();
 	*/
 
-	I2C2_StartTransmission(I2C_Direction_Transmitter, WM8978_ADDR);
-	I2C2_WriteData((reg<<1) | ((val>>8) & 0x01));
+	I2C2_StartTransmission(I2C_Direction_Transmitter, (WM8978_ADDR << 1) | 0); // write to WM8978_ADDR
+	I2C2_WriteData((reg << 1) | ((val >> 8) & 0x01)); // write register address + the most significant bit of data
+	I2C2_WriteData(val & 0xff); // send 8 bit data
 	I2C2_Stop();
 	WM8978_REGVAL_TBL[reg] = val; // Save the register value locally
+
 	return 0;
 }
-
 
 // WM8978 read register
 // is to read the corresponding value in the local register buffer
@@ -137,6 +138,7 @@ void WM8978_ADDA_Cfg(uint8_t dacen, uint8_t adcen) {
 	}
 	WM8978_Write_Reg(2, regval); // Set R2
 }
+
 
 // WM8978 input channel configuration
 // micen: MIC on (1) / off (0)
