@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////// ////////////////////////////////
 
 // WM8978 register value buffer (a total of 58 registers, 0 ~ 57), occupying 116 bytes of memory
-// Because the IIC operation of WM8978 does not support read operations, all register values ​​are saved locally
+// Because the IIC operation of WM8978 does not support read operations, all register values �뗢�땇re saved locally
 // When writing WM8978 register, it synchronously updates to the local register value. When reading the register, it directly returns the register value saved locally.
 // Note: The register value of WM8978 is 9 bits, so use uint16_t to store.
 static uint16_t WM8978_REGVAL_TBL[58] = { 0X0000, 0X0000, 0X0000, 0X0000,
@@ -82,17 +82,24 @@ uint8_t WM8978_Write_Reg(uint8_t reg, uint16_t val) {
 // {
 // printf ("% s,% d, res =% d! \ n", __ FUNCTION __, __ LINE __, res);
 //}
+
+	/*
 	IIC_Start();
 	IIC_Send_Byte((WM8978_ADDR << 1) | 0); // Send Device Address + Write Command
 	if (IIC_Wait_Ack ())
-	        printf ("% s,% d \ n", __ FUNCTION __, 1); // wait for reply (successful? / failed?)
-	    IIC_Send_Byte((reg << 1) | ((val >> 8) & 0X01)); // write register address + the most significant bit of data
+	혻혻혻혻혻혻혻혻printf ("% s,% d \ n", __ FUNCTION __, 1); // wait for reply (successful? / failed?)
+	혻혻혻혻IIC_Send_Byte((reg << 1) | ((val >> 8) & 0X01)); // write register address + the most significant bit of data
 	if (IIC_Wait_Ack ())
-	        printf ("% s,% d \ n", __ FUNCTION __, 2); // wait for reply (successful? / failed?)
+	혻혻혻혻혻혻혻혻printf ("% s,% d \ n", __ FUNCTION __, 2); // wait for reply (successful? / failed?)
 	IIC_Send_Byte(val & 0xFF); // Send data
 	if (IIC_Wait_Ack ())
-	        printf ("% s,% d \ n", __FUNCTION __, 3); // wait for reply (successful? / failed?)
-	    IIC_Stop();
+	혻혻혻혻혻혻혻혻printf ("% s,% d \ n", __FUNCTION __, 3); // wait for reply (successful? / failed?)
+	혻혻혻혻IIC_Stop();
+	*/
+
+	I2C2_StartTransmission(I2C_Direction_Transmitter, WM8978_ADDR);
+	I2C2_WriteData((reg<<1) | ((val>>8) & 0x01));
+	I2C2_Stop();
 	WM8978_REGVAL_TBL[reg] = val; // Save the register value locally
 	return 0;
 }
