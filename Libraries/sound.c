@@ -56,6 +56,26 @@ void Sound_Run(void) {
 	I2C_Cmd(I2C2, ENABLE);
 }
 
+void Sound_Test_init(void) {
+	WM8978_Init();
+
+	WM8978_SPKvol_Set(60);
+
+	GPIO_InitTypeDef GPIOB_init_struct;
+
+	// DACDAT
+	GPIOB_init_struct.GPIO_Pin = GPIO_Pin_15;
+	GPIOB_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIOB_init_struct.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_Init(ss.GPIO, &GPIOB_init_struct);
+
+}
+
+void Sound_Test_run(void) {
+	GPIO_WriteBit(GPIOB, GPIO_Pin_15, Bit_SET);
+}
+
+
 void I2C2_Stop() {
 	I2C_GenerateSTOP(I2C2, ENABLE);
 }

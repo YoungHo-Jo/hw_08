@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////// ////////////////////////////////
 
 // WM8978 register value buffer (a total of 58 registers, 0 ~ 57), occupying 116 bytes of memory
-// Because the IIC operation of WM8978 does not support read operations, all register values �뗢�땇re saved locally
+// Because the IIC operation of WM8978 does not support read operations, all register values 占쎈뿢占쎈븛re saved locally
 // When writing WM8978 register, it synchronously updates to the local register value. When reading the register, it directly returns the register value saved locally.
 // Note: The register value of WM8978 is 9 bits, so use uint16_t to store.
 static uint16_t WM8978_REGVAL_TBL[58] = { 0X0000, 0X0000, 0X0000, 0X0000,
@@ -33,6 +33,7 @@ uint8_t WM8978_Init(void) {
 	if (res)
 		return 1;
 	// instruction failed to send, WM8978 exception
+
 	// The following is a general setting
 	// set MICEN to 1 (MIC enabled), BIASEN set to 1 (simulator work), VMIDSEL [1: 0] set to: 11 (5K) WM8978_Write_Reg (1,0X1B)
 	WM8978_Write_Reg (2,0X1B0);// R2, ROUT1, LOUT1 output enable (headphone can work), BOOSTENR, BOOSTENL enable
@@ -46,9 +47,10 @@ uint8_t WM8978_Init(void) {
 	WM8978_Write_Reg(14, 1 << 3); // R14, ADC 128x sample rate
 
 	//// playback settings
-	// WM8978_ADDA_Cfg (1,0); // Turn on the DAC
-	// WM8978_Input_Cfg (0,0,0); // close the input channel
-	// WM8978_Output_Cfg (1,0); // Turn on the DAC output
+	 WM8978_ADDA_Cfg (1,0); // Turn on the DAC
+	 WM8978_Input_Cfg (0,0,0); // close the input channel
+	 WM8978_Output_Cfg (1,0); // Turn on the DAC output
+
 	//// recording settings
 	// WM8978_ADDA_Cfg (0,1); // turn on the ADC
 	// WM8978_Input_Cfg (1,1,0); // Turn on the MIC & LINE IN
@@ -59,12 +61,12 @@ uint8_t WM8978_Init(void) {
 
 
 	// Simultaneous recording and playback settings
-	WM8978_ADDA_Cfg(1, 1); // Turn on the DAC
-	WM8978_Input_Cfg(1, 1, 0); // Turn on the MIC & LINE IN
-	WM8978_Output_Cfg(1, 0); // Turn on the DAC output
-	WM8978_MIC_Gain(46); // MIC gain setting
-	WM8978_HPvol_Set(25, 25);
-	WM8978_SPKvol_Set(30); // 50
+//	WM8978_ADDA_Cfg(1, 1); // Turn on the DAC
+//	WM8978_Input_Cfg(1, 1, 0); // Turn on the MIC & LINE IN
+//	WM8978_Output_Cfg(1, 0); // Turn on the DAC output
+//	WM8978_MIC_Gain(46); // MIC gain setting
+//	WM8978_HPvol_Set(25, 25);
+//	WM8978_SPKvol_Set(30); // 50
 	return 0;
 }
 
@@ -87,14 +89,14 @@ uint8_t WM8978_Write_Reg(uint8_t reg, uint16_t val) {
 	IIC_Start();
 	IIC_Send_Byte((WM8978_ADDR << 1) | 0); // Send Device Address + Write Command
 	if (IIC_Wait_Ack ())
-	혻혻혻혻혻혻혻혻printf ("% s,% d \ n", __ FUNCTION __, 1); // wait for reply (successful? / failed?)
-	혻혻혻혻IIC_Send_Byte((reg << 1) | ((val >> 8) & 0X01)); // write register address + the most significant bit of data
+	�삵샍�삵샍�삵샍�삵샍printf ("% s,% d \ n", __ FUNCTION __, 1); // wait for reply (successful? / failed?)
+	�삵샍�삵샍IIC_Send_Byte((reg << 1) | ((val >> 8) & 0X01)); // write register address + the most significant bit of data
 	if (IIC_Wait_Ack ())
-	혻혻혻혻혻혻혻혻printf ("% s,% d \ n", __ FUNCTION __, 2); // wait for reply (successful? / failed?)
+	�삵샍�삵샍�삵샍�삵샍printf ("% s,% d \ n", __ FUNCTION __, 2); // wait for reply (successful? / failed?)
 	IIC_Send_Byte(val & 0xFF); // Send data
 	if (IIC_Wait_Ack ())
-	혻혻혻혻혻혻혻혻printf ("% s,% d \ n", __FUNCTION __, 3); // wait for reply (successful? / failed?)
-	혻혻혻혻IIC_Stop();
+	�삵샍�삵샍�삵샍�삵샍printf ("% s,% d \ n", __FUNCTION __, 3); // wait for reply (successful? / failed?)
+	�삵샍�삵샍IIC_Stop();
 	*/
 
 	I2C2_StartTransmission(I2C_Direction_Transmitter, WM8978_ADDR);
