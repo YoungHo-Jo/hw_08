@@ -31,12 +31,12 @@ void Terminal_Init() {
      Terminal_Rcc_Init();
      Terminal_Struct_Init();
 
-     gpioa_init_struct.GPIO_Pin = ts.TX;
+     gpioa_init_struct.GPIO_Pin = ts->TX;
      gpioa_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
      gpioa_init_struct.GPIO_Mode = GPIO_Mode_AF_PP;
      GPIO_Init(GPIOA, &gpioa_init_struct);
 
-     gpioa_init_struct.GPIO_Pin = ts.RX;
+     gpioa_init_struct.GPIO_Pin = ts->RX;
      gpioa_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
      gpioa_init_struct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
      GPIO_Init(GPIOA, &gpioa_init_struct);
@@ -44,7 +44,7 @@ void Terminal_Init() {
      // USARTy_Tx_DMA_Channel (triggered by USARTy Tx event) Config
      DMA_DeInit(DMA1_Channel4);	
      DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART1->DR;
-     DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)ts.RX_Buffer;
+     DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)ts->RX_Buffer;
      DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
      DMA_InitStructure.DMA_BufferSize = TERMINAL_RX_BUFFER_SIZE;
      DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
