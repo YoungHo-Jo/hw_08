@@ -5,6 +5,8 @@
 #include "stm32f10x_dma.h"
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_tim.h"
+#include "stm32f10x_rcc.h"
+#include "stm32f10x_dac.h"
 
 void PIEZO_RCC_init(void);
 void PIEZO_init(void);

@@ -8,8 +8,8 @@
 #include "init.h"
 
 void defaultSystemInit() {
-    SysInit();
-    SetSysClock();
+	SysInit();
+	SetSysClock();
 }
 
 void SetSysClock(void) {
@@ -67,9 +67,9 @@ void SetSysClock(void) {
 		//HSE에서 들어오는 frequency = 25MHz
 		//HSE -> CFGR2 -> CFGR1 -> System순일떄 PREDIV2와 PLL2MUL를 잘 조절해서 CFGR1으로!
 		RCC->CFGR2 &= (uint32_t) ~(RCC_CFGR2_PREDIV2 | RCC_CFGR2_PLL2MUL |
-		RCC_CFGR2_PREDIV1 | RCC_CFGR2_PREDIV1SRC);
-		RCC->CFGR2 |= (uint32_t) (RCC_CFGR2_PREDIV2_DIV5 | RCC_CFGR2_PLL2MUL8 |
-		RCC_CFGR2_PREDIV1SRC_PLL2 | RCC_CFGR2_PREDIV1_DIV5);
+		RCC_CFGR2_PLL3MUL | RCC_CFGR2_PREDIV1 | RCC_CFGR2_PREDIV1SRC);
+		RCC->CFGR2 |= (uint32_t) (RCC_CFGR2_PREDIV2_DIV5 | RCC_CFGR2_PLL2MUL8
+				| RCC_CFGR2_PLL3MUL8 | RCC_CFGR2_PREDIV1SRC_PLL2 | RCC_CFGR2_PREDIV1_DIV5);
 
 		/* Enable PLL2 */
 		RCC->CR |= RCC_CR_PLL2ON;
@@ -84,6 +84,12 @@ void SetSysClock(void) {
 		while ((RCC->CR & RCC_CR_PLLRDY) == 0) {
 		}
 
+		/* Enable PLL3 */
+		RCC->CR |= RCC_CR_PLL3ON;
+		/* Wait till PLL2 is ready */
+		while ((RCC->CR & RCC_CR_PLL3RDY) == 0) {
+		}
+
 		/* Select PLL as system clock source */
 		RCC->CFGR &= (uint32_t) ((uint32_t) ~(RCC_CFGR_SW));
 		RCC->CFGR |= (uint32_t) RCC_CFGR_SW_PLL;
@@ -94,19 +100,8 @@ void SetSysClock(void) {
 	} else { /* If HSE fails to start-up, the application will have wrong clock
 	 configuration. User can add here some code to deal with this error */
 	}
-
-
-    // 사용처를 알수 없는 RCC ========================= //
-	// RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPDEN; // enable PORT_D PORT_A
-
-	// GPIOD->CRL = GPIO_CRL_MODE2_0; // set PD2 to MODE2 // output
-	// GPIOD->CRL = GPIO_CRL_MODE2_0; // set PD2 to MODE2 // output
-
-	// GPIOA->CRH = GPIO_CRH_CNF8_1 | GPIO_CRH_MODE8;
-	// RCC->CFGR |= RCC_CFGR_MCO_SYSCLK;
-    // ============================================ //
+	RCC->CFGR |= RCC_CFGR_MCO_SYSCLK;
 }
-
 
 void SysInit(void) {
 	/* Set HSION bit */
@@ -134,9 +129,6 @@ void SysInit(void) {
 	/* Reset CFGR2 register */
 	RCC->CFGR2 = 0x00000000;
 }
-
-
-
 
 void initLED() {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
@@ -182,5 +174,4 @@ void setLED(uint8_t one, uint8_t two, uint8_t three, uint8_t four) {
 		GPIO_ResetBits(GPIOD, GPIO_Pin_7);
 	}
 }
-
 

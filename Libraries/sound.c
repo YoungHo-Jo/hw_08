@@ -14,14 +14,15 @@ void Sound_RCC_init(void) {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2 | RCC_APB1Periph_SPI2, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
-
 	// reset SPI2
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, ENABLE);
 	// end reset SPI2
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, DISABLE);
 
-	// i dont know it is really required.
-	GPIO_AFIODeInit();
+	// Reset I2C2
+	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C2, ENABLE);
+	// End Reset I2C2
+	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C2, DISABLE);
 }
 
 void Sound_init(void) {
@@ -32,10 +33,10 @@ void Sound_init(void) {
 	GPIOB_init_struct.GPIO_Pin = ss.SCL;
 	GPIOB_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIOB_init_struct.GPIO_Mode = GPIO_Mode_AF_OD;
-	GPIO_Init(ss.GPIO, &GPIOB_init_struct);
+	GPIO_Init(GPIOB, &GPIOB_init_struct);
 
 	GPIOB_init_struct.GPIO_Pin = ss.SDA;
-	GPIO_Init(ss.GPIO, &GPIOB_init_struct);
+	GPIO_Init(GPIOB, &GPIOB_init_struct);
 
 	// I2S needs Push Pull 
 	// DACDAT
@@ -57,13 +58,14 @@ void Sound_init(void) {
 	// Setup the I2C2 BUS properties
 	I2C2_init_struct.I2C_Mode = I2C_Mode_I2C;
 	I2C2_init_struct.I2C_DutyCycle = I2C_DutyCycle_2;
-	I2C2_init_struct.I2C_ClockSpeed = 100000;
+	I2C2_init_struct.I2C_ClockSpeed = 400000;
 	// Setup I2C2 BUS master properties
-	I2C2_init_struct.I2C_OwnAddress1 = 0;
+	I2C2_init_struct.I2C_OwnAddress1 = 0x30;
 	I2C2_init_struct.I2C_Ack = I2C_Ack_Enable;
 	I2C2_init_struct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_Init(I2C2, &I2C2_init_struct);
 	I2C_Cmd(I2C2, ENABLE);
+
 
 	// init BCLK, LRC, DACDAT
 	I2S_InitTypeDef I2S2_InitStructure;
@@ -85,18 +87,18 @@ void Sound_init(void) {
 
 
 	// calculate packet error checking
-//	I2C_CalculatePEC(I2C2, ENABLE);
+	//	I2C_CalculatePEC(I2C2, ENABLE);
 
-// receive interrupt ==> not using now
-// NVIC_InitTypeDef NVIC_InitStructure;
-// NVIC_InitStructure.NVIC_IRQChannelCmd = I2C2_EV_IRQn;
-// NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-// NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-// NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-// NVIC_Init(&NVIC_InitStructure);
+	// receive interrupt ==> not using now
+	// NVIC_InitTypeDef NVIC_InitStructure;
+	// NVIC_InitStructure.NVIC_IRQChannelCmd = I2C2_EV_IRQn;
+	// NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	// NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	// NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	// NVIC_Init(&NVIC_InitStructure);
 
-// enable intterupt
-//	I2C_ITConfig(I2C2, I2C_IT_EVT | I2C_IT_BUF, ENABLE);
+	// enable intterupt
+	//	I2C_ITConfig(I2C2, I2C_IT_EVT | I2C_IT_BUF, ENABLE);
 
 
 }
@@ -114,24 +116,6 @@ void Sound_Test_init(void) {
 
 	I2S2_TX_DMA_init(buf, buf, 70);
 	DMA_Cmd(DMA1_Channel5, ENABLE);
-
-
-
-//	GPIO_InitTypeDef GPIOB_init_struct;
-//
-//	// DACDAT
-//	GPIOB_init_struct.GPIO_Pin = GPIO_Pin_15;
-//	GPIOB_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
-//	GPIOB_init_struct.GPIO_Mode = GPIO_Mode_Out_PP;
-//	GPIO_Init(ss.GPIO, &GPIOB_init_struct);
-
-//	// BCLK
-//	GPIOB_init_struct.GPIO_Pin = GPIO_Pin_13;
-//	GPIO_Init(GPIOB, &GPIOB_init_struct);
-////	GPIO_SetBits(GPIOB, GPIO_Pin_13);
-//
-//	GPIOB_init_struct.GPIO_Pin = GPIO_Pin_12;
-//	GPIO_Init(GPIOB, &GPIOB_init_struct);
 
 }
 
@@ -151,17 +135,18 @@ void I2C2_Stop() {
 void I2C2_StartTransmission(uint8_t transmissionDirection, uint8_t slaveAddress) {
 	// wait unitl i2c2 module is idle
 
-
 	setLED(1, 0, 0, 1);
-	while (I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY));
+	while (I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY)) {
+		u8 flag1 = GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_11);
+		u8 flag2 = GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_10);
+		setLED(1, flag1, flag2, 1);
+	}
 	setLED(0, 1, 1, 0);
 	// generate the start condition
 	I2C_GenerateSTART(I2C2, ENABLE);
 
 	//
 	while (!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT));
-
-
 
 	// send the address of the slave to be contacted
 	I2C_Send7bitAddress(I2C2, slaveAddress, transmissionDirection);

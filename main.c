@@ -5,6 +5,8 @@
 #include "touchSensor.h"
 #include "terminal.h"
 #include "sound.h"
+#include "piezo.h"
+
 
 
 // flash load "./hw_team08/Debug/hw_team08.axf"
@@ -36,8 +38,8 @@ int main(void) {
 //	Terminal_init();
 
 	Sound_init();
-	// gpio touch init┐═ init timer╕ж lcd init ║╕┤┘ ╟╥ ░ц┐ь lcd init└╠ ┴ж┤ы╖╬ └╠╖ч╛ю┴Ў┴Ў ╛╩└╕╕ч
-	// ░ш╝╙ 1└╟ ░к└╠ ╡щ╛ю┐╚
+	// gpio touch initя┐╜я┐╜ init timerя┐╜я┐╜ lcd init я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜ я┐╜я┐╜я┐╜ lcd initя┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜╠╖я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜
+	// я┐╜я┐╜я┐╜ 1я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜
 //	GPIO_touch_init_all();
 
 	// run
@@ -45,11 +47,16 @@ int main(void) {
 //	Terminal_Run();
 	Sound_Run();
 
+	RCC->APB2ENR = RCC_APB2ENR_IOPAEN;
+	GPIOA->CRH = GPIO_CRH_CNF8_1 | GPIO_CRH_MODE8;
+	RCC->CFGR |= RCC_CFGR2_I2S2SRC;
 
-	Sound_Test_init();
-	// TIMER └█╡┐╜├ ║э╖ч┼ї╜║┐б╝н ║╕╡х╖╬ ░б┤┬ USART└╟ └№╝█└╗ ┼╕└╠╕╙░б ╗п╛ю░б╣Ў╕о▒т ╢з╣о┐б
-	// ┐┬└№╟╧┴Ў ╕°╟╤ ╡е└╠┼═░б └№╝█╡╟╛ю └▀╕°╡╚ ╣о└┌░б ┼═╣╠│╬┐б ┬я╚√└╗ ╚о└╬╟╧┐┤└╜
+//	Sound_Test_init();
+	// TIMER я┐╜█╡я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜ USARTя┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜ ┼╕я┐╜╠╕╙░я┐╜ я┐╜я┐╜я┐╜ю░бя┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜
+	// я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜═░я┐╜ я┐╜я┐╜█╡╟╛я┐╜ я┐╜▀╕я┐╜я┐╜ я┐╜я┐╜я┐╜┌░я┐╜ я┐╜═╣╠│╬┐я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ ╚оя┐╜я┐╜я┐╜╧┐я┐╜я┐╜я┐╜
 //	init_Timer2();
+
+
 
 	while (1) {
 //		Terminal_sendToBT();
