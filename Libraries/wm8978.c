@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////// ////////////////////////////////
 
 // WM8978 register value buffer (a total of 58 registers, 0 ~ 57), occupying 116 bytes of memory
-// Because the IIC operation of WM8978 does not support read operations, all register values �좎럥�삣뜝�덉쑅占쎈맍苑믭옙�얠삕占싸밸눀占쎄펽 saved locally
+// Because the IIC operation of WM8978 does not support read operations, all register values 占쎌쥙�ο옙�ｋ쐻占쎈뜆�끻뜝�덈쭕�묐��숋옙�좎굲�좎떥諛몃��좎럡��saved locally
 // When writing WM8978 register, it synchronously updates to the local register value. When reading the register, it directly returns the register value saved locally.
 // Note: The register value of WM8978 is 9 bits, so use uint16_t to store.
 static uint16_t WM8978_REGVAL_TBL[58] = { 0X0000, 0X0000, 0X0000, 0X0000,
@@ -30,6 +30,7 @@ uint8_t WM8978_Init(void) {
 	uint8_t res;
 
 	res = WM8978_Write_Reg(0, 0); // soft reset WM8978
+
 	if (res)
 		return 1;
 	// instruction failed to send, WM8978 exception
@@ -88,14 +89,14 @@ uint8_t WM8978_Write_Reg(uint8_t reg, uint16_t val) {
 	IIC_Start();
 	IIC_Send_Byte((WM8978_ADDR << 1) | 0); // Send Device Address + Write Command
 	if (IIC_Wait_Ack ())
-	占쎌쥙�⒵쾮占쎌삕繹먮퀫�앾옙��븕�좎럡�삼옙醫롫윪亦낉옙�숁틦蹂잙쐻占쎈슡�곩뜝�꾪돸printf ("% s,% d \ n", __ FUNCTION __, 1); // wait for reply (successful? / failed?)
-	占쎌쥙�⒵쾮占쎌삕繹먮퀫�앾옙��븕�좎럡�팇IC_Send_Byte((reg << 1) | ((val >> 8) & 0X01)); // write register address + the most significant bit of data
+	�좎럩伊숋옙�듭쒜�좎럩�뺟뭐癒��占쎌빢�숋옙占쎈툞占쎌쥙�∽옙�쇱삕�ル∥�や벧�됱삕占쎌늸��퉪�숈맶�좎럥�∽옙怨⑸쐻占쎄쑵�퇼rintf ("% s,% d \ n", __ FUNCTION __, 1); // wait for reply (successful? / failed?)
+	�좎럩伊숋옙�듭쒜�좎럩�뺟뭐癒��占쎌빢�숋옙占쎈툞占쎌쥙�∽옙�놦C_Send_Byte((reg << 1) | ((val >> 8) & 0X01)); // write register address + the most significant bit of data
 	if (IIC_Wait_Ack ())
-	占쎌쥙�⒵쾮占쎌삕繹먮퀫�앾옙��븕�좎럡�삼옙醫롫윪亦낉옙�숁틦蹂잙쐻占쎈슡�곩뜝�꾪돸printf ("% s,% d \ n", __ FUNCTION __, 2); // wait for reply (successful? / failed?)
+	�좎럩伊숋옙�듭쒜�좎럩�뺟뭐癒��占쎌빢�숋옙占쎈툞占쎌쥙�∽옙�쇱삕�ル∥�や벧�됱삕占쎌늸��퉪�숈맶�좎럥�∽옙怨⑸쐻占쎄쑵�퇼rintf ("% s,% d \ n", __ FUNCTION __, 2); // wait for reply (successful? / failed?)
 	IIC_Send_Byte(val & 0xFF); // Send data
 	if (IIC_Wait_Ack ())
-	占쎌쥙�⒵쾮占쎌삕繹먮퀫�앾옙��븕�좎럡�삼옙醫롫윪亦낉옙�숁틦蹂잙쐻占쎈슡�곩뜝�꾪돸printf ("% s,% d \ n", __FUNCTION __, 3); // wait for reply (successful? / failed?)
-	占쎌쥙�⒵쾮占쎌삕繹먮퀫�앾옙��븕�좎럡�팇IC_Stop();
+	�좎럩伊숋옙�듭쒜�좎럩�뺟뭐癒��占쎌빢�숋옙占쎈툞占쎌쥙�∽옙�쇱삕�ル∥�や벧�됱삕占쎌늸��퉪�숈맶�좎럥�∽옙怨⑸쐻占쎄쑵�퇼rintf ("% s,% d \ n", __FUNCTION __, 3); // wait for reply (successful? / failed?)
+	�좎럩伊숋옙�듭쒜�좎럩�뺟뭐癒��占쎌빢�숋옙占쎈툞占쎌쥙�∽옙�놦C_Stop();
 	*/
 
 	I2C2_StartTransmission(I2C_Direction_Transmitter, (WM8978_ADDR << 1) | 0); // write to WM8978_ADDR

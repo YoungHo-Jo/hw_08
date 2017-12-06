@@ -57,13 +57,12 @@ void Sound_init(void) {
 	// Setup the I2C2 BUS properties
 	I2C2_init_struct.I2C_Mode = I2C_Mode_I2C;
 	I2C2_init_struct.I2C_DutyCycle = I2C_DutyCycle_2;
-	I2C2_init_struct.I2C_ClockSpeed = 48000;
+	I2C2_init_struct.I2C_ClockSpeed = 100000;
 	// Setup I2C2 BUS master properties
 	I2C2_init_struct.I2C_OwnAddress1 = 0;
 	I2C2_init_struct.I2C_Ack = I2C_Ack_Enable;
 	I2C2_init_struct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_Init(I2C2, &I2C2_init_struct);
-
 	I2C_Cmd(I2C2, ENABLE);
 
 	// init BCLK, LRC, DACDAT
@@ -76,9 +75,11 @@ void Sound_init(void) {
 	I2S2_InitStructure.I2S_CPOL = I2S_CPOL_Low;
 	I2S_Init(SPI2, &I2S2_InitStructure);
 
+
 	///// i am not sure /////
 	// SPI_Cmd(SPI2, ENABLE);
 	I2S_Cmd(SPI2, ENABLE);
+	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Tx, ENABLE);
 
 
 	// calculate packet error checking
@@ -102,11 +103,17 @@ void Sound_Run(void) {
 
 }
 
+
 void Sound_Test_init(void) {
 	WM8978_Init();
 
 	WM8978_SPKvol_Set(30);
 	WM8978_HPvol_Set(30, 30);
+
+	I2S2_TX_DMA_init(buf, buf, 70);
+//	DMA_Cmd(DMA1_Channel4, ENABLE);
+
+
 
 //	GPIO_InitTypeDef GPIOB_init_struct;
 //
@@ -127,7 +134,7 @@ void Sound_Test_init(void) {
 }
 
 void Sound_Test_run(void) {
-	SPI_I2S_SendData(SPI2, 0x76a3);
+//	SPI_I2S_SendData(SPI2, 0x23);
 
 	// debuging
 //	uint8_t txe = SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE);
@@ -141,15 +148,18 @@ void I2C2_Stop() {
 
 void I2C2_StartTransmission(uint8_t transmissionDirection, uint8_t slaveAddress) {
 	// wait unitl i2c2 module is idle
-	while (I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY))
-		;
 
+
+	setLED(1, 0, 0, 1);
+	while (I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY));
+	setLED(0, 1, 1, 0);
 	// generate the start condition
 	I2C_GenerateSTART(I2C2, ENABLE);
 
 	//
-	while (!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT))
-		;
+	while (!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT));
+
+
 
 	// send the address of the slave to be contacted
 	I2C_Send7bitAddress(I2C2, slaveAddress, transmissionDirection);
@@ -295,13 +305,13 @@ void I2S2_TX_DMA_init(u8 *buf0, u8 *buf1, u16 num) {
 
 
 // i2s dma callback function pointer
-void (* i2s_tx_callback) (void);
-
-
-void DMA1_Channel4_IRQn(void) {
-	if(DMA_GetITStatus(DMA1_Channel4, DMA_IT_TCIF4) == SET) {
-		DMA_ClearITPendingBit(DMA1_Channel4, DMA_IT_TCIF4);
-		i2s_tx_callback();
-	}
-
-}
+//void (* i2s_tx_callback) (void);
+//
+//
+//void DMA1_Channel4_IRQn(void) {
+//	if(DMA_GetITStatus(DMA1_Channel4, DMA_IT_TCIF4) == SET) {
+//		DMA_ClearITPendingBit(DMA1_Channel4, DMA_IT_TCIF4);
+//		i2s_tx_callback();
+//	}
+//
+//}
