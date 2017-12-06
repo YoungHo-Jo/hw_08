@@ -5,9 +5,6 @@
  *      Author: hw_8
  */
 #include "touchSensor.h"
-int color[12] = { WHITE, CYAN, BLUE, RED, MAGENTA, LGRAY, GREEN, YELLOW, BROWN,
-		BRRED, GRAY };
-
 
 const uint16_t TOUCH_DO = GPIO_Pin_0;
 const uint16_t TOUCH_RE = GPIO_Pin_8;
@@ -19,13 +16,13 @@ const uint16_t TOUCH_TI = GPIO_Pin_3;
 
 /*
 GPIO_Pin_0
-PB1  도
-PB8  레
-PB9  미
-PB7  파
-PB5  솔
-PB4  라
-PB3  시
+PB1  ��
+PB8  ��
+PB9  誘�
+PB7  ��
+PB5  ��
+PB4  ��
+PB3  ��
 PA15
 */
 
@@ -168,40 +165,7 @@ void GPIO_touch_init_all() {
 
 }
 
-void TIM2_IRQHandler(void) //핸들러 함수에서  TIM_GetITStatus(TIM2,TIM_IT_Update)를 통해서 인터럽트 플래그가  set 되어있는지 확인하고 내가 만든 변수 증가한다.
-{
-	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
-		//LCD_ShowString(100, 200, "abcd", WHITE, BLUE);
-		LCD_ShowNum(100, 200, syllable, 5, WHITE, BLUE);
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); // Clear the interrupt flag
-	}
-}
 
-void init_Timer2() {
-	NVIC_InitTypeDef NVIC_InitStructure;
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-
-	/* TIM2 Clock Enable */
-
-	/* Enable TIM2 Global Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);  //NVIC 초기화
-
-	/* TIM2 Initialize */
-	TIM_TimeBaseStructure.TIM_Period = 200 - 1; // 100kHz// 주기
-	TIM_TimeBaseStructure.TIM_Prescaler = 1000 - 1; //
-	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure); //타임 초기화
-
-	/* TIM2 Enale */
-	TIM_Cmd(TIM2, ENABLE); //타이머가 가득차면 인터럽트 발생
-	TIM_ITConfig(TIM2, TIM_IT_Update | TIM_IT_CC1, ENABLE); // interrupt enable
-}
 
 
 

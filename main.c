@@ -6,13 +6,16 @@
  */
 
 
+// flash load ./a/Debug/a.axf
 #include "init.h"
 #include "bluetooth.h"
 #include "lcd.h"
 #include "Touch.h"
 #include "touchSensor.h"
+#include "pressureSensor.h"
 #include "terminal.h"
 #include "bluetooth.h"
+#include "timer.h"
 
 
 int main(void) {
@@ -21,11 +24,9 @@ int main(void) {
 	LCD_Init();
 	LCD_Clear(WHITE);
 	LCD_ShowNum(100, 200, 234, 5, WHITE, BLUE);
+
 	GPIO_touch_init_all();
-
-	BT_Init();
-	Terminal_Init();
-
+	//adc_config();
 
 	init_Timer2();
 
@@ -34,3 +35,6 @@ int main(void) {
 	}
 
 }
+
+
+

@@ -1,146 +1,72 @@
 #include "pressureSensor.h"
 
-/**
- * Returns GPIO_PinSource according to the paramter GPIO_Pin
- */
-uint8_t getPressurePinSrc(uint16_t pressureGPIO) {
-    switch(pressureGPIO) {
-        case PRESSURE_a:
-            return GPIO_PinSource0;
-        case PRESSURE_b:
-            return GPIO_PinSource0;
-        case PRESSURE_c:
-            return GPIO_PinSource0;
-        case PRESSURE_d:
-            return GPIO_PinSource0;
-        case PRESSURE_e:
-            return GPIO_PinSource0;
-        case PRESSURE_f:
-            return GPIO_PinSource0;
-        case PRESSURE_g:
-            return GPIO_PinSource0;
-    }
+GPIO_InitTypeDef myGPIO;
+ADC_InitTypeDef myADC;
+DMA_InitTypeDef DMA_InitStructure;
+
+uint32_t pressure[3] = {0, 0, 0};
+
+void GPIO_config(void) {
+	// initialize LED C8, 9
+	myGPIO.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 ; //
+	myGPIO.GPIO_Mode = GPIO_Mode_AIN; //set as analog input
+	GPIO_Init(GPIOA, &myGPIO); //set to C1, C2
+
+	myGPIO.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 ; //
+	myGPIO.GPIO_Mode = GPIO_Mode_AIN; //set as analog input
+	GPIO_Init(GPIOA, &myGPIO); //set to C1, C2
 }
 
+void adc_config(void) {
+	// adc gpio_input setting
+	GPIO_config();
 
-/**
- * Returns EXTI_Line according to the paramter GPIO_Pin
- */
-uint32_t get_pressure_EXTI_Line(uint16_t pressureGPIO) {
-    switch(pressureGPIO) {
-        case PRESSURE_a:
-            return EXTI_Line0;
-        case PRESSURE_b:
-            return EXTI_Line0;
-        case PRESSURE_c:
-            return EXTI_Line0;
-        case PRESSURE_d:
-            return EXTI_Line0;
-        case PRESSURE_e:
-            return EXTI_Line0;
-        case PRESSURE_f:
-            return EXTI_Line0;
-        case PRESSURE_g:
-            return EXTI_Line0;
-    }
+	//clock setting
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	RCC_ADCCLKConfig(RCC_PCLK2_Div6); //clock for ADC (max 14MHz, 72/6=12MHz)
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE); //enable ADC clock
+
+	// DMA1 channel1 configuration ----------------------------------------------
+
+	//configure ADC1 parameters
+	myADC.ADC_Mode = ADC_Mode_Independent;
+	myADC.ADC_ScanConvMode = ENABLE;
+	myADC.ADC_ContinuousConvMode = ENABLE;
+	myADC.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+	myADC.ADC_DataAlign = ADC_DataAlign_Right;
+	myADC.ADC_NbrOfChannel = 3;
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_55Cycles5); //PC1 as Input
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 2, ADC_SampleTime_55Cycles5); //PC2 as Input
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 3, ADC_SampleTime_55Cycles5); //PC2 as Input
+
+	ADC_Init(ADC1, &myADC);
+	ADC_Cmd(ADC1, ENABLE);
+
+	//Calibrate ADC *optional?
+	ADC_ResetCalibration(ADC1);
+	while (ADC_GetResetCalibrationStatus(ADC1))
+		;
+	ADC_StartCalibration(ADC1);
+	while (ADC_GetCalibrationStatus(ADC1))
+		;
+
+	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+
+	DMA_DeInit(DMA1_Channel1);
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &ADC1->DR;
+	DMA_InitStructure.DMA_MemoryBaseAddr = (u32) pressure;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+	DMA_InitStructure.DMA_BufferSize = 3;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word; // 32bit
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word; // 32bit
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	DMA_Init(DMA1_Channel1, &DMA_InitStructure);
+	// Enable DMA1 Channel1
+
+	ADC_DMACmd(ADC1, ENABLE);
+	DMA_Cmd(DMA1_Channel1, ENABLE);
 }
-
-/**
- * Returns EXTI_IRQn according to the paramter GPIO_Pin
- */
-uint32_t get_pressure_EXIT_IRQn(uint16_t pressureGPIO) {
-    switch(pressureGPIO) {
-        case PRESSURE_a:
-            return EXTI0_IRQn;
-        case PRESSURE_b:
-            return EXTI0_IRQn;
-        case PRESSURE_c:
-            return EXTI0_IRQn;
-        case PRESSURE_d:
-            return EXTI0_IRQn;
-        case PRESSURE_e:
-            return EXTI0_IRQn;
-        case PRESSURE_f:
-            return EXTI0_IRQn;
-        case PRESSURE_g:
-            return EXTI0_IRQn;
-    }
-}
-
-/**
- * Returns GPIO_PinSource according to the parameter GPIO_pin
- *
- */
-uint8_t get_pressure_GPIO_PinSource(uint16_t pressureGPIO) {
-    switch(pressureGPIO) {
-        case PRESSURE_a:
-            return GPIO_PortSourceGPIOA;
-        case PRESSURE_b:
-            return GPIO_PortSourceGPIOA;
-        case PRESSURE_c:
-            return GPIO_PortSourceGPIOA;
-        case PRESSURE_d:
-            return GPIO_PortSourceGPIOA;
-        case PRESSURE_e:
-            return GPIO_PortSourceGPIOA;
-        case PRESSURE_f:
-            return GPIO_PortSourceGPIOA;
-        case PRESSURE_g:
-            return GPIO_PortSourceGPIOA;
-    }
-}
-
-/**
- * Returns GPIO_typeDef according to the parameter GPIO_Pin
- *
- */
- GPIO_TypeDef* get_pressure_GPIO_TypeDef(uint16_t pressureGPIO) {
-    switch(pressureGPIO) {
-        case PRESSURE_a:
-            return GPIOA;
-        case PRESSURE_b:
-            return GPIOA;
-        case PRESSURE_c:
-            return GPIOA;
-        case PRESSURE_d:
-            return GPIOA;
-        case PRESSURE_e:
-            return GPIOA;
-        case PRESSURE_f:
-            return GPIOA;
-        case PRESSURE_g:
-            return GPIOA;
-    }
- }
-
-/**
- * Sets GPIO Sensor
- *
- *
- */
-void GPIO_pressure_init(GPIO_TypeDef* GPIOx, uint16_t pin) {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	EXTI_InitTypeDef EXTI_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	GPIO_InitStructure.GPIO_Pin = pin; // do
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-	GPIO_Init(get_pressure_GPIO_TypeDef(pin), &GPIO_InitStructure);
-	GPIO_EXTILineConfig(get_pressure_GPIO_PinSource(pin), getPressurePinSrc(pin));
-
-	EXTI_InitStructure.EXTI_Line = get_pressure_EXTI_Line(pin);
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-    	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitStructure);
-
-	NVIC_InitStructure.NVIC_IRQChannel = get_pressure_EXIT_IRQn(pin);
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-}
-
-
-

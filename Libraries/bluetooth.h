@@ -18,7 +18,6 @@ typedef struct {
 	uint16_t RX_Counter;
 } BT_Struct;
 
-
 void BT_Struct_Init(void);
 void BT_Rcc_Init(void);
 void BT_Init(void);

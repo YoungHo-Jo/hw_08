@@ -35,7 +35,8 @@ void BT_Init() {
 	GPIOA_init_struct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(bs.GPIO, &GPIOA_init_struct);
 
-	DMA_DeInit(DMA1_Channel4);
+
+/*	DMA_DeInit(DMA1_Channel4);
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &USART1->DR;
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) bs.RX_Buffer;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
@@ -48,6 +49,7 @@ void BT_Init() {
 	DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
 	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 	DMA_Init(DMA1_Channel4, &DMA_InitStructure);
+*/
 
 	// USART2 init
 	USART2_init_struct.USART_BaudRate = 9600;
@@ -66,7 +68,7 @@ void BT_Init() {
 	NVIC_init_struct.NVIC_IRQChannelSubPriority = 1;
 	NVIC_Init(&NVIC_init_struct);
 
-	USART_DMACmd(USART1, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
+	//USART_DMACmd(USART1, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
 	USART_Cmd(USART2, ENABLE);
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 }
@@ -75,15 +77,24 @@ void USART2_IRQHandler(void) {
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
 		// receive a char from sender
 		uint16_t c = USART_ReceiveData(USART2);
-
+		int i;
 		if (c == '\r' || c == '\n') {
 			bs.RX_Buffer[bs.RX_Counter++] = c;
+
+			for (i=0; i<bs.RX_Counter; i++) {
+				USART_SendData(USART1, c);
+				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE)) {}
+			}
+
+			/*
 			DMA1_Channel4->CMAR = (uint32_t) bs.RX_Buffer;
 			DMA1_Channel4->CNDTR = bs.RX_Counter;
 			DMA_Cmd(DMA1_Channel4, ENABLE);
 			while (DMA_GetFlagStatus(DMA1_FLAG_TC4) == RESET) {}
 			DMA_ClearITPendingBit(DMA1_IT_TC4);
 			DMA_Cmd(DMA1_Channel4, DISABLE);
+			*/
+
 			bs.RX_Counter = 0;
 		} else if (bs.RX_Counter < BT_RX_BUFFER_SIZE) {
 			bs.RX_Buffer[bs.RX_Counter++] = c;

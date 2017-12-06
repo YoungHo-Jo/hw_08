@@ -13,7 +13,7 @@
 #include "stm32f10x_exti.h"
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_tim.h"
-#include "lcd.h"
+
 
 typedef struct __GPIO_setting_data {
     uint8_t pin_src;
@@ -31,8 +31,7 @@ void EXTI9_5_IRQHandler(void);
 GPIO_setting_data get_GPIO_Setting_Data(uint16_t key);
 void GPIO_touch_init(uint16_t key);
 void GPIO_touch_init_all(void);
-void TIM2_IRQHandler(void);
-void init_Timer2(void);
+
 
 #endif
 

@@ -33,6 +33,7 @@ void Terminal_Init() {
 	gpioa_init_struct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &gpioa_init_struct);
 
+	/*
 	DMA_DeInit(DMA1_Channel7);
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &USART2->DR;
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) ts.RX_Buffer;
@@ -46,7 +47,7 @@ void Terminal_Init() {
 	DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
 	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 	DMA_Init(DMA1_Channel7, &DMA_InitStructure);
-
+	*/
 	usart1_init_struct.USART_BaudRate = 115200;
 	usart1_init_struct.USART_WordLength = USART_WordLength_8b;
 	usart1_init_struct.USART_StopBits = USART_StopBits_1;
@@ -61,7 +62,7 @@ void Terminal_Init() {
 	nvic_init_struct.NVIC_IRQChannelSubPriority = 1;
 	NVIC_Init(&nvic_init_struct);
 
-	USART_DMACmd(USART2, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
+	//USART_DMACmd(USART2, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
 	USART_Cmd(USART1, ENABLE);
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
@@ -69,17 +70,27 @@ void Terminal_Init() {
 void USART1_IRQHandler() {
 	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
 		char c = USART_ReceiveData(USART1);
-
+		int i;
 		if (c == '\r' || c == '\n') {
 			ts.RX_Buffer[ts.RX_Counter++] = c;
+
+
+			for (i=0; i<ts.RX_Counter; i++) {
+				USART_SendData(USART2, c);
+				while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE)) {}
+			}
+
+			/*
 			DMA1_Channel7->CMAR = (uint32_t) ts.RX_Buffer;
 			DMA1_Channel7->CNDTR = ts.RX_Counter;
 			DMA_Cmd(DMA1_Channel7, ENABLE);
-			while (DMA_GetFlagStatus(DMA1_FLAG_TC7) == RESET) {
-			}
+			while (DMA_GetFlagStatus(DMA1_FLAG_TC7) == RESET) {}
 			DMA_ClearITPendingBit(DMA1_IT_TC7);
 			DMA_Cmd(DMA1_Channel7, DISABLE);
+			*/
+
 			ts.RX_Counter = 0;
+
 
 		} else if (ts.RX_Counter < TERMINAL_RX_BUFFER_SIZE) {
 			ts.RX_Buffer[ts.RX_Counter++] = c;
