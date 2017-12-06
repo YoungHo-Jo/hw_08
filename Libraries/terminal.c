@@ -80,8 +80,8 @@ void Terminal_sendToBT() {
 	if (ts.readyToSend == TRUE) {
 		int i = 0;
 		for (i = 0; i < ts.RX_Counter; i++) {
-			USART_SendData(USART2, ts.RX_Buffer[i]);
-			while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE))
+			USART_SendData(USART1, ts.RX_Buffer[i]);
+			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE))
 				;
 		}
 		ts.RX_Counter = 0;
