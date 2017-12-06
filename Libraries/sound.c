@@ -1,5 +1,6 @@
 #include "sound.h"
 
+
 Sound_struct ss;
 
 Sound_struct* Sound_Struct_init(void) {
@@ -15,9 +16,10 @@ void Sound_RCC_init(void) {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
 	// reset SPI2
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+	RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, ENABLE);
 	// end reset SPI2
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, DISABLE);
+	RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, DISABLE);
+
 }
 
 void Sound_init(void) {
@@ -27,6 +29,9 @@ void Sound_init(void) {
 	GPIOB_init_struct.GPIO_Pin = ss.SCL | ss.SDA;
 	GPIOB_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIOB_init_struct.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_Init(ss.GPIO, &GPIOB_init_struct);
+
+	GPIOB_init_struct.GPIO_Pin = ss.SDA;
 	GPIO_Init(ss.GPIO, &GPIOB_init_struct);
 
 	// DACDAT
@@ -69,11 +74,6 @@ void Sound_init(void) {
 	I2S_Cmd(SPI2, ENABLE);
 
 
-
-
-
-
-
 	// calculate packet error checking
 //	I2C_CalculatePEC(I2C2, ENABLE);
 
@@ -101,7 +101,6 @@ void Sound_Test_init(void) {
 	WM8978_SPKvol_Set(30);
 	WM8978_HPvol_Set(30, 30);
 
-
 //	GPIO_InitTypeDef GPIOB_init_struct;
 //
 //	// DACDAT
@@ -121,7 +120,12 @@ void Sound_Test_init(void) {
 }
 
 void Sound_Test_run(void) {
-	SPI_I2S_SendData(SPI2, 0xe00e);
+	SPI_I2S_SendData(SPI2, 0x76a3);
+
+	// debuging
+//	uint8_t txe = SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_TXE);
+//	uint8_t udr = SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_OVR);
+//	setLED(0, 0, udr, txe);
 }
 
 void I2C2_Stop() {

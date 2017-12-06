@@ -136,3 +136,51 @@ void SysInit(void) {
 }
 
 
+
+
+void initLED() {
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
+
+	GPIO_InitTypeDef GPIO_InitStruct;
+
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+	GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_4;
+	GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_7;
+	GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+}
+
+void setLED(uint8_t one, uint8_t two, uint8_t three, uint8_t four) {
+	if (one) {
+		GPIO_SetBits(GPIOD, GPIO_Pin_2);
+	} else {
+		GPIO_ResetBits(GPIOD, GPIO_Pin_2);
+	}
+	if (two) {
+		GPIO_SetBits(GPIOD, GPIO_Pin_3);
+	} else {
+		GPIO_ResetBits(GPIOD, GPIO_Pin_3);
+	}
+
+	if (three) {
+		GPIO_SetBits(GPIOD, GPIO_Pin_4);
+	} else {
+		GPIO_ResetBits(GPIOD, GPIO_Pin_4);
+	}
+	if (four) {
+		GPIO_SetBits(GPIOD, GPIO_Pin_7);
+	} else {
+		GPIO_ResetBits(GPIOD, GPIO_Pin_7);
+	}
+}
+
+

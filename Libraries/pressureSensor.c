@@ -3,7 +3,7 @@
 
 GPIO_InitTypeDef myGPIO;
 ADC_InitTypeDef myADC;
-DMA_InitTypeDef DMA_InitStructure;
+//DMA_InitTypeDef DMA_InitStructure;
 
  void GPIO_config(void)
  {
@@ -22,28 +22,28 @@ void adc_config(uint32_t * adc_data)
 
 
   //clock setting
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-  RCC_ADCCLKConfig(RCC_PCLK2_Div6); //clock for ADC (max 14MHz, 72/6=12MHz)
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE); //enable ADC clock
+//  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+//  RCC_ADCCLKConfig(RCC_PCLK2_Div6); //clock for ADC (max 14MHz, 72/6=12MHz)
+//  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE); //enable ADC clock
 
 
 
   // DMA1 channel1 configuration ----------------------------------------------
-  DMA_DeInit(DMA1_Channel1);
-  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
-  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) adc_data;
-  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-  DMA_InitStructure.DMA_BufferSize = 5;
-  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word; // 32bit
-  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word; // 32bit
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-  DMA_Init(DMA1_Channel1, &DMA_InitStructure);
-  // Enable DMA1 Channel1
-  DMA_Cmd(DMA1_Channel1, ENABLE);
+//  DMA_DeInit(DMA1_Channel1);
+//  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&ADC1->DR;
+//  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) adc_data;
+//  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+//  DMA_InitStructure.DMA_BufferSize = 5;
+//  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+//  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+//  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word; // 32bit
+//  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word; // 32bit
+//  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+//  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+//  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+//  DMA_Init(DMA1_Channel1, &DMA_InitStructure);
+//  // Enable DMA1 Channel1
+//  DMA_Cmd(DMA1_Channel1, ENABLE);
 
   //configure ADC1 parameters
   myADC.ADC_Mode = ADC_Mode_Independent;
