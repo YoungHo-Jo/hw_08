@@ -2,17 +2,9 @@
 
 BT_Struct  * bs;
 
-void Send_String_Usart2(int len)
-{
-     DMA1_Channel4->CMAR = (uint32_t)bs->BT_RX_Buffer;
-     DMA1_Channel4->CNDTR = len;
-     DMA_Cmd(DMA1_Channel4, ENABLE);
-}
-
 void BT_RCC_init() {
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-	BT_Struct_Init();
 }
 
 void BT_Struct_Init() {
@@ -45,7 +37,7 @@ void BT_init() {
 	GPIO_Init(bs->BT_GPIO, &GPIOA_init_struct);
 
 	DMA_DeInit(DMA1_Channel4);	
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART2->DR;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART1->DR;
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)bs->RT_RX_Buffer;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 	DMA_InitStructure.DMA_BufferSize = BT_RX_BUFFER_SIZE;
@@ -66,7 +58,6 @@ void BT_init() {
 	USART2_init_struct.USART_Parity = USART_Parity_No;
 	USART2_init_struct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART2_init_struct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-
 	USART_Init(USART2, &USART2_init_struct);
 
 	// NVIC init for Interrupt handler
@@ -77,7 +68,7 @@ void BT_init() {
 	NVIC_Init(&NVIC_init_struct);
 
 
-	USART_DMACmd(USART2, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
+	USART_DMACmd(USART1, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
 	USART_Cmd(USART2, ENABLE);
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 }
@@ -89,16 +80,17 @@ void USART2_IRQHandler(void) {
 
 		if (c == '\r' || c == '\n') {
 		  bs->BT_RX_Buffer[bs->BT_RX_Counter++] = c;
-		  Send_String_Usart2(bs->RT_RX_Counter);
+		  DMA1_Channel4->CMAR = (uint32_t)bs->BT_RX_Buffer;
+     		  DMA1_Channel4->CNDTR = bs->BT_RX_Counter;
+                  DMA_Cmd(DMA1_Channel4, ENABLE);
 		  whlie (DMA_GetFlagStatus(DMA1_FLAG_TC4) == RESET){}
 		  DMA_ClearITPendingBit(DMA1_IT_TC4);
 		  DMA_Cmd(DMA1_Channel4, DISABLE);
 		  bs->BT_RX_Counter = 0;
 		}
-		else if (bs->BT_RX_Counter < USART_RX_BUFFER_SIZE) {
+		else if (bs->BT_RX_Counter < BT_RX_BUFFER_SIZE) {
 		  bs->BT_RX_Buffer[bs->BT_RX_Counter++] = c;
 		}
-
 
 		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 	}
