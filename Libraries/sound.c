@@ -111,7 +111,7 @@ void Sound_Test_init(void) {
 	WM8978_HPvol_Set(30, 30);
 
 	I2S2_TX_DMA_init(buf, buf, 70);
-//	DMA_Cmd(DMA1_Channel4, ENABLE);
+	DMA_Cmd(DMA1_Channel5, ENABLE);
 
 
 
@@ -267,7 +267,7 @@ void I2S2_TX_DMA_init(u8 *buf0, u8 *buf1, u16 num) {
 	// DMA1 clock enable
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
-	DMA_DeInit(DMA1_Channel4);
+	DMA_DeInit(DMA1_Channel5);
 	
 	// // Waits for DMA1_Stream4 to be configurable
 	// while ( DMA_GetCmdStatus (DMA1_Stream4)! = DISABLE) {} 
@@ -275,8 +275,8 @@ void I2S2_TX_DMA_init(u8 *buf0, u8 *buf1, u16 num) {
 	// DMA_ClearITPendingBit (DMA1_Stream4, DMA_IT_FEIF4 | DMA_IT_DMEIF4 | DMA_IT_TEIF4 | DMA_IT_HTIF4 | DMA_IT_TCIF4); 
 
 	/* Configuring DMA Stream */
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&SPI2->DR; 
-	DMA_InitStructure.DMA_MemoryBaseAddr = (u32)buf0; // DMA memory 0 address
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (u32) &SPI2->DR; 
+	DMA_InitStructure.DMA_MemoryBaseAddr = (u32) buf0; // DMA memory 0 address
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST; // memory to perhipheral mode
 	DMA_InitStructure.DMA_BufferSize = num; 
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -289,18 +289,18 @@ void I2S2_TX_DMA_init(u8 *buf0, u8 *buf1, u16 num) {
 //   DMA_InitStructure. DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
 //   DMA_InitStructure. DMA_MemoryBurst = DMA_MemoryBurst_Single; // Peripheral burst single transfer
 //   DMA_InitStructure. DMA_PeripheralBurst = DMA_PeripheralBurst_Single; // Memory Burst Single Transfer
-	DMA_Init(DMA1_Channel4, &DMA_InitStructure);
+	DMA_Init(DMA1_Channel5, &DMA_InitStructure);
 
 // 	DMA_DoubleBufferModeConfig (DMA1_Stream4, (u32) buf1, DMA_Memory_0); // Double-buffering mode configuration
  
 //   DMA_DoubleBufferModeCmd (DMA1_Stream4, ENABLE); // double buffering mode on
 
-	DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);
+	// DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);
 
-	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel4_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
-	NVIC_Init(&NVIC_InitStructure);
+	// NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel5_IRQn;
+	// NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+	// NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	// NVIC_Init(&NVIC_InitStructure);
 }
 
 
