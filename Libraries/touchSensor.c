@@ -19,13 +19,13 @@ const uint16_t TOUCH_TI = GPIO_Pin_3;
 
 /*
 GPIO_Pin_0
-PB1  µµ
-PB8  ·¹
-PB9  ¹Ì
-PB7  ÆÄ
-PB5  ¼Ö
-PB4  ¶ó
-PB3  ½Ã
+PB1  ë„
+PB8  ë ˆ
+PB9  ë¯¸
+PB7  íŒŒ
+PB5  ì†”
+PB4  ë¼
+PB3  ì‹œ
 PA15
 */
 
@@ -42,33 +42,33 @@ void EXTI1_IRQHandler(void) {
 
 void EXTI3_IRQHandler(void) {
 	if (EXTI_GetITStatus(EXTI_Line3) != RESET) {
-		syllable ^= 0x01000000;
+		syllable ^= (0x01 << 6);
 		EXTI_ClearITPendingBit(EXTI_Line3);
 	}
 }
 
 void EXTI4_IRQHandler(void) {
 	if (EXTI_GetITStatus(EXTI_Line4) != RESET) {
-		syllable ^= 0x100000;
+		syllable ^= (0x01 << 5);
 		EXTI_ClearITPendingBit(EXTI_Line4);
 	}
 }
 
 void EXTI9_5_IRQHandler(void) {
 	if (EXTI_GetITStatus(EXTI_Line5) != RESET) {
-		syllable ^= 0x010000;
+		syllable ^= (0x01 << 4);
 		EXTI_ClearITPendingBit(EXTI_Line5);
 	}
 	else if (EXTI_GetITStatus(EXTI_Line7) != RESET) {
-		syllable ^= 0x1000;
+		syllable ^= (0x01 << 3);
 		EXTI_ClearITPendingBit(EXTI_Line7);
 	}
 	else if (EXTI_GetITStatus(EXTI_Line8) != RESET) {
-		syllable ^= 0x10;
+		syllable ^= (0x01 << 1);
 		EXTI_ClearITPendingBit(EXTI_Line8);
 	}
 	else if (EXTI_GetITStatus(EXTI_Line9) != RESET) {
-		syllable ^= 0x0100;
+		syllable ^= (0x01 << 2);
 		EXTI_ClearITPendingBit(EXTI_Line9);
 	}
 }
@@ -168,7 +168,7 @@ void GPIO_touch_init_all() {
 
 }
 
-void TIM2_IRQHandler(void) //ÇÚµé·¯ ÇÔ¼ö¿¡¼­  TIM_GetITStatus(TIM2,TIM_IT_Update)¸¦ ÅëÇØ¼­ ÀÎÅÍ·´Æ® ÇÃ·¡±×°¡  set µÇ¾îÀÖ´ÂÁö È®ÀÎÇÏ°í ³»°¡ ¸¸µç º¯¼ö Áõ°¡ÇÑ´Ù.
+void TIM2_IRQHandler(void) //í•¸ë“¤ëŸ¬ í•¨ìˆ˜ì—ì„œ  TIM_GetITStatus(TIM2,TIM_IT_Update)ë¥¼ í†µí•´ì„œ ì¸í„°ëŸ½íŠ¸ í”Œë˜ê·¸ê°€  set ë˜ì–´ìˆëŠ”ì§€ í™•ì¸í•˜ê³  ë‚´ê°€ ë§Œë“  ë³€ìˆ˜ ì¦ê°€í•œë‹¤.
 {
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
 		//LCD_ShowString(100, 200, "abcd", WHITE, BLUE);
@@ -186,20 +186,20 @@ void init_Timer2() {
 
 	/* Enable TIM2 Global Interrupt */
 	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);  //NVIC ÃÊ±âÈ­
+	NVIC_Init(&NVIC_InitStructure);  //NVIC ì´ˆê¸°í™”
 
 	/* TIM2 Initialize */
-	TIM_TimeBaseStructure.TIM_Period = 200 - 1; // 100kHz// ÁÖ±â
+	TIM_TimeBaseStructure.TIM_Period = 200 - 1; // 100kHz// ì£¼ê¸°
 	TIM_TimeBaseStructure.TIM_Prescaler = 1000 - 1; //
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure); //Å¸ÀÓ ÃÊ±âÈ­
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure); //íƒ€ì„ ì´ˆê¸°í™”
 
 	/* TIM2 Enale */
-	TIM_Cmd(TIM2, ENABLE); //Å¸ÀÌ¸Ó°¡ °¡µæÂ÷¸é ÀÎÅÍ·´Æ® ¹ß»ı
+	TIM_Cmd(TIM2, ENABLE); //íƒ€ì´ë¨¸ê°€ ê°€ë“ì°¨ë©´ ì¸í„°ëŸ½íŠ¸ ë°œìƒ
 	TIM_ITConfig(TIM2, TIM_IT_Update | TIM_IT_CC1, ENABLE); // interrupt enable
 }
 
