@@ -76,10 +76,12 @@ void Sound_init(void) {
 	I2S_Init(SPI2, &I2S2_InitStructure);
 
 
+
 	///// i am not sure /////
 	// SPI_Cmd(SPI2, ENABLE);
-	I2S_Cmd(SPI2, ENABLE);
 	SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Tx, ENABLE);
+	I2S_Cmd(SPI2, ENABLE);
+	
 
 
 	// calculate packet error checking
