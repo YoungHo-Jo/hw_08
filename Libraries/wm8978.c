@@ -35,8 +35,9 @@ uint8_t WM8978_Init(void) {
 	// instruction failed to send, WM8978 exception
 
 	// The following is a general setting
-	// set MICEN to 1 (MIC enabled), BIASEN set to 1 (simulator work), VMIDSEL [1: 0] set to: 11 (5K) WM8978_Write_Reg (1,0X1B)
-	WM8978_Write_Reg (2,0X1B0);// R2, ROUT1, LOUT1 output enable (headphone can work), BOOSTENR, BOOSTENL enable
+	// set MICEN to 1 (MIC enabled), BIASEN set to 1 (simulator work), VMIDSEL [1: 0] set to: 11 (5K) 
+	WM8978_Write_Reg (1,0X1B);
+	WM8978_Write_Reg (2,0X1b0);// R2, ROUT1, LOUT1 output enable (headphone can work), BOOSTENR, BOOSTENL enable
 	WM8978_Write_Reg(3, 0X60); // R3, LOUT2, ROUT2 output enable (speaker work), RMIX, LMIX enable
 	WM8978_Write_Reg(6, 0); // R6, MCLK is provided externally
 	WM8978_Write_Reg(43, 1 << 4); // R43, INVROUT2 reverse, drive horn

@@ -13,20 +13,23 @@ Sound_struct* Sound_Struct_init(void) {
 void Sound_RCC_init(void) {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2 | RCC_APB1Periph_SPI2, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+
 
 	// reset SPI2
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, ENABLE);
 	// end reset SPI2
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, DISABLE);
 
+	// i dont know it is really required.
+	GPIO_AFIODeInit();
 }
 
 void Sound_init(void) {
 	GPIO_InitTypeDef GPIOB_init_struct;
 
 	// config I2C2 pins: SCL and SDA == GPIOB_Pin_10 and GPIOB_Pin_11
-	GPIOB_init_struct.GPIO_Pin = ss.SCL | ss.SDA;
+	// I2C needs Open Drain
+	GPIOB_init_struct.GPIO_Pin = ss.SCL;
 	GPIOB_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIOB_init_struct.GPIO_Mode = GPIO_Mode_AF_OD;
 	GPIO_Init(ss.GPIO, &GPIOB_init_struct);
@@ -34,6 +37,7 @@ void Sound_init(void) {
 	GPIOB_init_struct.GPIO_Pin = ss.SDA;
 	GPIO_Init(ss.GPIO, &GPIOB_init_struct);
 
+	// I2S needs Push Pull 
 	// DACDAT
 	GPIOB_init_struct.GPIO_Pin = GPIO_Pin_15;
 	GPIOB_init_struct.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -71,6 +75,9 @@ void Sound_init(void) {
 	I2S2_InitStructure.I2S_AudioFreq = I2S_AudioFreq_Default;
 	I2S2_InitStructure.I2S_CPOL = I2S_CPOL_Low;
 	I2S_Init(SPI2, &I2S2_InitStructure);
+
+	///// i am not sure /////
+	// SPI_Cmd(SPI2, ENABLE);
 	I2S_Cmd(SPI2, ENABLE);
 
 
@@ -180,3 +187,121 @@ uint8_t I2C2_ReadData() {
 
 }
 
+///////// ******* modify this!!! *********
+// Sampling rate calculation formula: Fs = I2SxCLK / [256 * (2 * I2SDIV + ODD)]
+// I2SxCLK = (HSE / pllm) * PLLI2SN / PLLI2SR
+// General HSE = 8Mhz
+// pllm: Sys_Clock_Set set in the time to determine, usually 8
+// PLLI2SN: usually 192 ~ 432
+// PLLI2SR: 2 ~ 7
+// I2SDIV: 2 ~ 255
+// ODD: 0/1
+// I2S frequency division coefficient table @ pllm = 8, HSE = 8Mhz, vco input frequency of 1Mhz
+// Table format: sample rate / 10, PLLI2SN, PLLI2SR, I2SDIV, ODD
+const uint16_t I2S_PSC_TBL [][5] = {
+	{ 800 , 256 , 5 , 12 , 1 },		 // 8Khz sample rate
+	{ 1102 , 429 , 4 , 19 , 0 },		 // 11.025Khz sample rate
+	{ 1600 , 213 , 2 , 13 , 0 },		 // 16Khz sample rate
+	{ 2205 , 429 , 4 , 9 , 1 },		 // 22.05Khz sample rate
+	{ 3200 , 213 , 2 , 6 , 1 },		 // 32Khz sample rate
+	{ 4410 , 271 , 2 , 6 , 0 },		 // 44.1 Khz sample rate
+	{ 4800 , 258 , 3 , 3 , 1 },		 // 48Khz sample rate
+	{ 8820 , 316 , 2 , 3 , 1 },		 // 88.2Khz sample rate
+	{ 9600 , 344 , 2 , 3 , 1 },  	 // 96Khz sample rate
+	{ 17640 , 361 , 2 , 2 , 0 },  	 // 176.4Khz sample rate
+	{ 19200 , 393 , 2 , 2 , 0 },  	 // 192Khz sample rate
+};
+
+
+// Set the sampling rate of IIS (@MCKEN)
+// samplerate: sampling rate, unit: Hz
+// Return value: 0, set successfully; 1, can not be set.
+// uint8_t I2S2_SampleRate_Set(uint32_t samplerate)
+// { 
+// 	u8 i = 0 ;
+// 	u32 tempreg = 0 ;
+// 	samplerate /= 10 ; // 10 times smaller   
+	
+// 	for (i = 0; i < (sizeof(I2S_PSC_TBL)/10); i++) {
+// 		// See if the sample rate can be changed
+// 		if (samplerate == I2S_PSC_TBL[i][0]) break;
+// 	}
+ 
+
+
+// 	RCC_PLLI2SCmd(DISABLE); // Turn off PLLI2S first
+// 	if (i == ( sizeof (I2S_PSC_TBL) / 10 )) return  1 ; / / searched too can not find
+// 	RCC_PLLI2SConfig ((U32) I2S_PSC_TBL [I] [ . 1 ], (U32) I2S_PSC_TBL [I] [ 2 ]); // Set the frequency I2SxCLK (x = 2) is provided PLLI2SN PLLI2SR
+ 
+// 	RCC-> CR | = 1 << 26 ;					 // Turn on the I2S clock
+// 	while ((RCC-> CR & 1 << 27 ) == 0 );		 // Wait for the I2S clock to turn on successfully.
+// 	tempreg = I2S_PSC_TBL [i] [ 3 ] << 0 ;	 // Set I2SDIV
+// 	tempreg | = I2S_PSC_TBL [i] [ 3 ] << 8 ;	 // Set ODD bit
+// 	tempreg | = 1 << 9 ;					 // MCKOE bit is enabled and MCK is output
+// 	SPI2-> I2SPR = tempreg;			 // Set I2SPR register
+// 	return  0 ;
+// }  
+
+
+
+
+// I2S2 TX DMA configuration
+// Set to double buffering mode and turn DMA transfer complete interrupt
+// buf0: M0AR address.
+// buf1: M1AR address.
+// num: the amount of data transferred each time
+void I2S2_TX_DMA_init(u8 *buf0, u8 *buf1, u16 num) {
+	NVIC_InitTypeDef NVIC_InitStructure;
+	DMA_InitTypeDef DMA_InitStructure;
+
+	// DMA1 clock enable
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+
+	DMA_DeInit(DMA1_Channel4);
+	
+	// // Waits for DMA1_Stream4 to be configurable
+	// while ( DMA_GetCmdStatus (DMA1_Stream4)! = DISABLE) {} 
+	// // Clear all interrupt flags on DMA1_Stream4	
+	// DMA_ClearITPendingBit (DMA1_Stream4, DMA_IT_FEIF4 | DMA_IT_DMEIF4 | DMA_IT_TEIF4 | DMA_IT_HTIF4 | DMA_IT_TCIF4); 
+
+	/* Configuring DMA Stream */
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (u32)&SPI2->DR; 
+	DMA_InitStructure.DMA_MemoryBaseAddr = (u32)buf0; // DMA memory 0 address
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST; // memory to perhipheral mode
+	DMA_InitStructure.DMA_BufferSize = num; 
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord; // 16bit
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord; // 16bit
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular; // 
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+// 	  DMA_InitStructure. DMA_FIFOMode = DMA_FIFOMode_Disable; // Do not use FIFO mode        
+//   DMA_InitStructure. DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+//   DMA_InitStructure. DMA_MemoryBurst = DMA_MemoryBurst_Single; // Peripheral burst single transfer
+//   DMA_InitStructure. DMA_PeripheralBurst = DMA_PeripheralBurst_Single; // Memory Burst Single Transfer
+	DMA_Init(DMA1_Channel4, &DMA_InitStructure);
+
+// 	DMA_DoubleBufferModeConfig (DMA1_Stream4, (u32) buf1, DMA_Memory_0); // Double-buffering mode configuration
+ 
+//   DMA_DoubleBufferModeCmd (DMA1_Stream4, ENABLE); // double buffering mode on
+
+	DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);
+
+	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel4_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	NVIC_Init(&NVIC_InitStructure);
+}
+
+
+// i2s dma callback function pointer
+void (* i2s_tx_callback) (void);
+
+
+void DMA1_Channel4_IRQn(void) {
+	if(DMA_GetITStatus(DMA1_Channel4, DMA_IT_TCIF4) == SET) {
+		DMA_ClearITPendingBit(DMA1_Channel4, DMA_IT_TCIF4);
+		i2s_tx_callback();
+	}
+
+}
