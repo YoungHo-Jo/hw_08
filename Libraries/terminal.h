@@ -8,12 +8,23 @@
 #include "stm32f10x_usart.h"
 #include "stm32f10x_dma.h"
 
-#define TERMINAL_RX_BUFFER_SIZE (100) 
+#define TERMINAL_RX_BUFFER_SIZE (1000)
 
-void Send_String_Usart2(int len);
-void Terminal_Struct_init(); 
-void Terminal_Rcc_init(); 
-void Terminal_Init(); 
-void USART1_IRQHandler(); 
 
-#endif TERMINAL_H
+typedef struct {
+	uint16_t TX;
+	uint16_t RX;
+	GPIO_TypeDef* GPIO;
+	char RX_Buffer[TERMINAL_RX_BUFFER_SIZE];
+	uint16_t RX_Counter;
+} Terminal_Struct;
+
+
+void Terminal_Struct_Init(void);
+void Terminal_Rcc_Init(void);
+void Terminal_Init(void);
+void USART1_IRQHandler(void);
+
+#endif
+
+
