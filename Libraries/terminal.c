@@ -1,5 +1,4 @@
 #include "terminal.h"
-#include "stdlib.h"
 
 Terminal_Struct ts;
 
