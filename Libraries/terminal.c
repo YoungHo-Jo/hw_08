@@ -2,13 +2,6 @@
 
 Terminal_Struct * ts;
 
-void Send_String_Usart2(int len)
-{
-     DMA1_Channel4->CMAR = (uint32_t)ts->RX_Buffer;
-     DMA1_Channel4->CNDTR = len;
-     DMA_Cmd(DMA1_Channel4, ENABLE);
-}
-
 void Terminal_Struct_init() {
      ts = (Terminal_Struct *)malloc(sizeof(Terminal_Struct));
      ts->GPIO = GPIOA;
@@ -20,7 +13,7 @@ void Terminal_Struct_init() {
 void Terminal_Rcc_init() {
      RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
      RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA, ENABLE);
-}
+
 
 void Terminal_Init() {
      USART_InitTypeDef usart1_init_struct;
@@ -42,19 +35,19 @@ void Terminal_Init() {
      GPIO_Init(GPIOA, &gpioa_init_struct);
 
      // USARTy_Tx_DMA_Channel (triggered by USARTy Tx event) Config
-     DMA_DeInit(DMA1_Channel4);	
-     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART1->DR;
+     DMA_DeInit(DMA1_Channel7);	
+     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART2->DR;
      DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)ts->RX_Buffer;
      DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
      DMA_InitStructure.DMA_BufferSize = TERMINAL_RX_BUFFER_SIZE;
-     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable
      DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
      DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
      DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
      DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
      DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
      DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-     DMA_Init(DMA1_Channel4, &DMA_InitStructure);
+     DMA_Init(DMA1_Channel7, &DMA_InitStructure);
 
      usart1_init_struct.USART_BaudRate = 115200;
      usart1_init_struct.USART_WordLength = USART_WordLength_8b;
@@ -70,7 +63,7 @@ void Terminal_Init() {
      nvic_init_struct.NVIC_IRQChannelSubPriority = 1;
      NVIC_Init(&nvic_init_struct);
 
-     USART_DMACmd(USART1, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
+     USART_DMACmd(USART2, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
      USART_Cmd(USART1, ENABLE);
      USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
@@ -81,10 +74,12 @@ void USART1_IRQHandler() {
 
 	  if (c == '\r' || c == '\n') {
 	       ts->RX_Buffer[ts->RX_Counter++] = c;
-	       Send_String_Usart1(ts->RX_Counter);
-	       whlie (DMA_GetFlagStatus(DMA1_FLAG_TC4) == RESET){}
-	       DMA_ClearITPendingBit(DMA1_IT_TC4);
-	       DMA_Cmd(DMA1_Channel4, DISABLE);
+	       DMA1_Channel7->CMAR = (uint32_t)ts->RX_Buffer;
+    		DMA1_Channel7->CNDTR = ts->RX_Counter;
+    		DMA_Cmd(DMA1_Channel7, ENABLE);
+	       whlie (DMA_GetFlagStatus(DMA1_FLAG_TC7) == RESET){}
+	       DMA_ClearITPendingBit(DMA1_IT_TC7);
+	       DMA_Cmd(DMA1_Channel7, DISABLE);
 	       ts->RX_Counter = 0;
 
 	  } else if (ts->RX_Counter < TERMINAL_RX_BUFFER_SIZE) {
