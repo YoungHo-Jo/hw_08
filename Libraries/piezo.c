@@ -1,60 +1,65 @@
 #include "piezo.h"
+#include "pressureSensor.h"
 
-void PIEZO_RCC_init(void) {
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
-}
-void PIEZO_init(void) {
+#define PCLK2 20000000
 
-	/* GPIO Setting */
+extern int pressure[];
+
+const int INIT_PERIOD = PCLK2/262;
+
+const uint16_t DO = PCLK2/(262*1000);
+const uint16_t RE = PCLK2/(294*1000);
+const uint16_t MI = PCLK2/(330*1000);
+const uint16_t FA = PCLK2/(349*1000);
+const uint16_t SO = PCLK2/(392*1000);
+const uint16_t LA = PCLK2/(440*1000);
+const uint16_t TI = PCLK2/(494*1000);
+
+const uint16_t period_arr[7] = {DO, RE, MI, FA, SO, LA, TI};
+int octave = 0;
+
+void Piezo_Config()
+{
 	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	/* TIM2 Configuration */
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
-	TIM_TimeBaseStructure.TIM_Period = 0xf;
-	TIM_TimeBaseStructure.TIM_Prescaler = 0xf;
-	TIM_TimeBaseStructure.TIM_ClockDivision = 0x0;
+	TIM_OCInitTypeDef TIM_OCInitStructure;
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+	TIM_TimeBaseStructure.TIM_Period = INIT_PERIOD;
+	TIM_TimeBaseStructure.TIM_Prescaler = 1000;
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
 
-	/* TIM2 TRGO selection */
-	TIM_SelectOutputTrigger(TIM2, TIM_TRGOSource_Update);
+	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1; 
+	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+	TIM_OCInitStructure.TIM_Pulse = 0;
+	TIM_OC3Init(TIM3, &TIM_OCInitStructure);
+	TIM_OC3PreloadConfig(TIM3, TIM_OCPreload_Enable);
+	TIM_ARRPreloadConfig(TIM3, ENABLE);
 
-	/* DAC Channel Configuration */
-	DAC_InitTypeDef DAC_InitStructure;
-	DAC_InitStructure.DAC_Trigger = DAC_Trigger_T2_TRGO;
-	DAC_InitStructure.DAC_WaveGeneration = DAC_WaveGeneration_Triangle;
-	DAC_InitStructure.DAC_LFSRUnmask_TriangleAmplitude =
-			DAC_TriangleAmplitude_4095;
-	DAC_InitStructure.DAC_OutputBuffer = DAC_OutputBuffer_Enable;
-	DAC_Init(DAC_Channel_1, &DAC_InitStructure);
-
-	/* DAC Channel2 Configuration */
-	DAC_InitStructure.DAC_LFSRUnmask_TriangleAmplitude =
-			DAC_TriangleAmplitude_1023;
-	DAC_Init(DAC_Channel_2, &DAC_InitStructure);
-
-	/* Enable DAC Channel1 */
-	// Once the DAC channel1 is enabled, PA,04 is automatically connected to the DAC convertor
-	DAC_Cmd(DAC_Channel_1, ENABLE);
-
-	/* Enable DAC Channel2 */
-	// Once the DAC channel2 is enabled, PA.05 is automatically connected to the DAC convertor
-	DAC_Cmd(DAC_Channel_2, ENABLE);
-
-	/* Set DAC dual channel DHR12RD register */
-	DAC_SetDualChannelData(DAC_Align_12b_R, 0x100, 0x100);
-
-	/* TIM2 enable counter */
-	TIM_Cmd(TIM2, ENABLE);
-
+	TIM_Cmd(TIM3, ENABLE);
 }
-void Delay(__IO uint32_t nCount) {
-	for (; nCount != 0; nCount--)
-		;
+  
+
+void setSound(uint32_t syll)
+{
+  int i;
+  for (i=0; i<7; i++) {
+    if ((syll >> i) & 1) {
+      TIM3->ARR = period_arr[i] >> octave;
+      TIM3->CCR3 = (TIM3->ARR/10)*3;//pressure[i];
+      return;
+    }
+  }
+  TIM3->CCR3 = 0;
 }
+

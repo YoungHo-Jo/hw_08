@@ -1,87 +1,79 @@
-/*
- * timer.c
- *
- *  Created on: 2017. 12. 7.
- *      Author: hw_4
- */
-
 #include "timer.h"
+#include "piezo.h"
+#include "pressureSensor.h"
+#include "touchSensor.h"
 
-extern uint32_t pressure[];
-extern int pressure_cnt;
-extern int time;
-extern int scale;
-extern const int minPressure;
-extern int recording;
+extern uint32_t syllable;
+extern int octave;
+extern int pressure[];
 
-int color[12] = { WHITE, CYAN, BLUE, RED, MAGENTA, LGRAY, GREEN, YELLOW, BROWN,BRRED, GRAY };
-uint32_t sound = 0;
-uint32_t record_arr[10000];
+uint32_t cur_syll;
+int color[12] = { WHITE, CYAN, BLUE, RED, MAGENTA, LGRAY, GREEN, YELLOW, BROWN,
+		BRRED, GRAY };
 
-void init_Timer2() {
+
+char syll_arr[RECORD_LEN];
+char oct_arr[RECORD_LEN];
+
+int record_idx = 0;
+int replay_idx = 0;
+int record_state = 0;
+int tick = 0;
+
+void Init_Sound_Timer2() {
 	NVIC_InitTypeDef NVIC_InitStructure;
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-
-	/* TIM2 Clock Enable */
 
 	/* Enable TIM2 Global Interrupt */
 	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);  //NVIC ?λ뜃由곤옙占?
+	NVIC_Init(&NVIC_InitStructure);  //NVIC ?貫�껆뵳怨ㅼ삕��
 
 	/* TIM2 Initialize */
-	TIM_TimeBaseStructure.TIM_Period = 200 - 1; // 100kHz// 雅뚯눊由?
-	TIM_TimeBaseStructure.TIM_Prescaler = 1000 - 1; //
+	TIM_TimeBaseStructure.TIM_Period = 50 - 1; // 100kHz// �낅슣�딁뵳?
+	TIM_TimeBaseStructure.TIM_Prescaler = 10; //
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure); //占쏙옙???λ뜃由곤옙占?
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure); //�좎룞��??貫�껆뵳怨ㅼ삕��
 
 	/* TIM2 Enale */
-	TIM_Cmd(TIM2, ENABLE); //占쏙옙?좂솒硫몌옙 揶쏉옙諭뤄㎕?ㅳ늺 占쎈챸苑ｏ옙???獄쏆뮇源?
+	TIM_Cmd(TIM2, ENABLE); //�좎룞��醫귥넂筌롫챿���띠룊�숃キ琉꾠럶?�노듆 �좎럥梨멱땻節륁삕?�??�꾩룇裕뉑틦?
 	TIM_ITConfig(TIM2, TIM_IT_Update | TIM_IT_CC1, ENABLE); // interrupt enable
 }
-void TIM2_IRQHandler(void) //占쎈챶諭억옙占쏙옙?λ땾占쎈Ŋ苑? TIM_GetITStatus(TIM2,TIM_IT_Update)?쒙옙占쎈벏鍮먲옙占쏙옙紐낃숲占쎌???占쎈슢?믤뉩硫몌옙  set 占쎌꼷堉깍옙?덈뮉筌욑옙占쎈벡?ㅿ옙?랁?占쎈떯占?筌띾슢諭?癰귨옙??筌앹빓占쏙옙?뺣뼄.
-{
-        
+void TIM2_IRQHandler(void) {
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
-	        setSound();
-	        LCD_ShowNum(0, 100, pressure[0], 5, WHITE, BLUE);
-	        LCD_ShowNum(40, 100, pressure[1], 5, WHITE, BLUE);
-	        LCD_ShowNum(80, 100, pressure[2], 5, WHITE, BLUE);
-	        LCD_ShowNum(120, 100, pressure[3], 5, WHITE, BLUE);
-	        LCD_ShowNum(160, 100, pressure[4], 5, WHITE, BLUE);
-	        LCD_ShowNum(200, 100, pressure[5], 5, WHITE, BLUE);
-	        LCD_ShowNum(240, 100, pressure[6], 5, WHITE, BLUE);
 
-		
-	        LCD_ShowNum(0, 50, sound, 5, WHITE, BLUE);
-	        LCD_ShowNum(80, 50, recording, 5, WHITE, BLUE);
+		if (tick == 1000) {
+			tick = 0;
+			LCD_ShowString(150, 100, "hello", WHITE, BLACK);
+			LCD_ShowString(150, 120, "hello", WHITE, BLACK);
+			LCD_ShowString(150, 140, "hello", WHITE, BLACK);
+			LCD_ShowString(150, 160, "hello", WHITE, BLACK);
+			LCD_ShowString(150, 180, "hello", WHITE, BLACK);
 
-		if (recording) {
-		     record_arr[time++] = sound;
-		     if (time == max_record_time)
-			  record = 0;
+			if (record_state == 1) {
+						syll_arr[record_idx] = syllable;
+						oct_arr[record_idx++] = octave;
+					} else if (record_state == 2) {
+						if (replay_idx == record_idx) {
+													replay_idx = 0;
+													record_state = 0;
+												}
+						syllable = syll_arr[replay_idx];
+						octave = oct_arr[replay_idx++];
+					}
 		}
-		 
+		tick++;
+		cur_syll = (cur_syll) ? cur_syll : syllable;
+		setSound(cur_syll);
+		cur_syll = cur_syll & (cur_syll - 1);
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); // Clear the interrupt flag
 	}
 }
 
 
-void setSound()
-{
-     int i;
-     int minVol = 3;
-     sound = 0;
-    
-     for (i=0; i<pressure_cnt; i++) {
-	 if (minPressure < pressure[i]) {
-	      sound |= 1<<i+scale*7;
-	 }
-     }
-}
-     
+
 

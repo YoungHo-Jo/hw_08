@@ -13,7 +13,11 @@
 #include "stm32f10x_tim.h"
 #include "stm32f10x_rcc.h"
 
-void init_Timer2(void);
+#define RECORD_LEN 20000
+
+void Init_Sound_Timer2(void);
 void TIM2_IRQHandler(void);
+void GPIO_Button_Init(void);
+void EXTI15_10_IRQHandler(void);
 
 #endif /* TIMER_H_ */

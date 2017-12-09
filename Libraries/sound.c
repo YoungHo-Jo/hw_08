@@ -3,14 +3,14 @@
 
 Sound_struct ss;
 
-Sound_struct* Sound_Struct_init(void) {
+Sound_struct* Sound_Struct_Init(void) {
 	ss.SCL = GPIO_Pin_10;
 	ss.SDA = GPIO_Pin_11;
 	ss.GPIO = GPIOB;
 	return &ss;
 }
 
-void Sound_RCC_init(void) {
+void Sound_RCC_Init(void) {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2 | RCC_APB1Periph_SPI2, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
@@ -25,7 +25,7 @@ void Sound_RCC_init(void) {
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C2, DISABLE);
 }
 
-void Sound_init(void) {
+void Sound_Init(void) {
 	GPIO_InitTypeDef GPIOB_init_struct;
 
 	// config I2C2 pins: SCL and SDA == GPIOB_Pin_10 and GPIOB_Pin_11
@@ -108,18 +108,18 @@ void Sound_Run(void) {
 }
 
 
-void Sound_Test_init(void) {
+void Sound_Test_Init(void) {
 	WM8978_Init();
 
 	WM8978_SPKvol_Set(30);
 	WM8978_HPvol_Set(30, 30);
 
-	I2S2_TX_DMA_init(buf, buf, 70);
+	I2S2_TX_DMA_Init(buf, buf, 70);
 	DMA_Cmd(DMA1_Channel5, ENABLE);
 
 }
 
-void Sound_Test_run(void) {
+void Sound_Test_Run(void) {
 //	SPI_I2S_SendData(SPI2, 0x23);
 
 	// debuging
@@ -136,7 +136,7 @@ void I2C2_StartTransmission(uint8_t transmissionDirection, uint8_t slaveAddress)
 	// wait unitl i2c2 module is idle
 
 	setLED(1, 0, 0, 1);
-	while (I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY)) {
+	while (!I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY)) {
 		u8 flag1 = GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_11);
 		u8 flag2 = GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_10);
 		setLED(1, flag1, flag2, 1);
@@ -247,7 +247,7 @@ const uint16_t I2S_PSC_TBL [][5] = {
 // buf0: M0AR address.
 // buf1: M1AR address.
 // num: the amount of data transferred each time
-void I2S2_TX_DMA_init(u8 *buf0, u8 *buf1, u16 num) {
+void I2S2_TX_DMA_Init(u8 *buf0, u8 *buf1, u16 num) {
 	NVIC_InitTypeDef NVIC_InitStructure;
 	DMA_InitTypeDef DMA_InitStructure;
 
@@ -282,12 +282,12 @@ void I2S2_TX_DMA_init(u8 *buf0, u8 *buf1, u16 num) {
  
 //   DMA_DoubleBufferModeCmd (DMA1_Stream4, ENABLE); // double buffering mode on
 
-	// DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);
+	 DMA_ITConfig(DMA1_Channel5, DMA_IT_TC, ENABLE);
 
-	// NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel5_IRQn;
-	// NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
-	// NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
-	// NVIC_Init(&NVIC_InitStructure);
+	 NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel5_IRQn;
+	 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;
+	 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;
+	 NVIC_Init(&NVIC_InitStructure);
 }
 
 

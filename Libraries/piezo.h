@@ -1,16 +1,20 @@
-#ifndef __PIEZO_H__
-#define __PIEZO_H__
+/*
+ * piezo.h
+ *
+ *  Created on: 2017. 12. 9.
+ *      Author: hw_5
+ */
 
-#include "stm32f10x.h"
-#include "stm32f10x_dma.h"
+#ifndef PIEZO_H_
+#define PIEZO_H_
+
+#include "stm32f10x_rcc.h"
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_tim.h"
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_dac.h"
+#include "stm32f10x.h"
+#include "misc.h"
 
-void PIEZO_RCC_init(void);
-void PIEZO_init(void);
-void Delay(__IO uint32_t nCount);
+void Piezo_Config(void);
+void setSound(uint32_t syll);
 
-
-#endif
+#endif /* PIEZO_H_ */

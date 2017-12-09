@@ -1,27 +1,28 @@
 #include "terminal.h"
 
-Terminal_Struct ts;
+T_Struct ts;
 
-void Terminal_Struct_Init() {
+T_Struct* T_Struct_Init() {
 	ts.GPIO = GPIOA;
 	ts.TX = GPIO_Pin_9;
 	ts.RX = GPIO_Pin_10;
 	ts.RX_Counter = 0;
+
+	return &ts;
 }
 
-void Terminal_Rcc_Init() {
+void T_RCC_Init() {
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA,ENABLE);
 }
 
-void Terminal_Init() {
+void T_Init() {
 	USART_InitTypeDef usart1_init_struct;
 	GPIO_InitTypeDef gpioa_init_struct;
 	NVIC_InitTypeDef nvic_init_struct;
-	DMA_InitTypeDef DMA_InitStructure;
+//	DMA_InitTypeDef DMA_InitStructure;
 
-	Terminal_Rcc_Init();
-	Terminal_Struct_Init();
+	T_Struct_Init();
 
 	gpioa_init_struct.GPIO_Pin = ts.TX;
 	gpioa_init_struct.GPIO_Speed = GPIO_Speed_50MHz;
@@ -58,23 +59,26 @@ void Terminal_Init() {
 
 	nvic_init_struct.NVIC_IRQChannel = USART1_IRQn;
 	nvic_init_struct.NVIC_IRQChannelCmd = ENABLE;
-	nvic_init_struct.NVIC_IRQChannelPreemptionPriority = 1;
-	nvic_init_struct.NVIC_IRQChannelSubPriority = 1;
+	nvic_init_struct.NVIC_IRQChannelPreemptionPriority = 0;
+	nvic_init_struct.NVIC_IRQChannelSubPriority = 0;
 	NVIC_Init(&nvic_init_struct);
 
 	//USART_DMACmd(USART2, USART_DMAReq_Tx | USART_DMAReq_Rx, ENABLE);
 	USART_Cmd(USART1, ENABLE);
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
-void Terminal_IRQHandler() {
+void T_IRQHandler() {
 	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
 			char c = USART_ReceiveData(USART1);
 
 			if (c == '\r' || c == '\n') {
-				Terminal_storeInBuf(c);
+				T_StoreInBuf(c);
+
+				USART_SendData(USART1, '\r');
+				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
 				ts.readyToSend = TRUE;
 			} else if (ts.RX_Counter < TERMINAL_RX_BUFFER_SIZE) {
-				Terminal_storeInBuf(c);
+				T_StoreInBuf(c);
 
 				USART_SendData(USART1, c);
 				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
@@ -85,20 +89,19 @@ void Terminal_IRQHandler() {
 }
 
 void USART1_IRQHandler(void) {
-	Terminal_IRQHandler();
+	T_IRQHandler();
 }
 
-void Terminal_Run() {
+void T_Run() {
 	USART_Cmd(USART1, ENABLE);
 }
 
-void Terminal_sendToBT() {
+void T_SendToBT() {
 	if (ts.readyToSend == TRUE) {
 		int i = 0;
 		for (i = 0; i < ts.RX_Counter; i++) {
-			USART_SendData(USART1, ts.RX_Buffer[i]);
-			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE))
-				;
+			USART_SendData(USART2, ts.RX_Buffer[i]);
+			while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE));
 		}
 		ts.RX_Counter = 0;
 
@@ -106,6 +109,6 @@ void Terminal_sendToBT() {
 	}
 }
 
-void Terminal_storeInBuf(uint16_t c) {
+void T_StoreInBuf(uint16_t c) {
 	ts.RX_Buffer[ts.RX_Counter++] = c;
 }

@@ -1,14 +1,15 @@
 // flash load ./a/Debug/a.axf
 #include "init.h"
-#include "bluetooth.h"
 #include "lcd.h"
 #include "Touch.h"
 #include "touchSensor.h"
 #include "pressureSensor.h"
-#include "terminal.h"
 #include "sound.h"
 #include "piezo.h"
 #include "timer.h"
+#include "button.h"
+#include "bluetooth.h"
+#include "terminal.h"
 
 
 
@@ -23,38 +24,34 @@ int main(void) {
 	/* RCC init part */
 	defaultSystemInit();
 	LCD_Init();
-	Terminal_Rcc_init();
-	BT_RCC_init();
-	Sound_RCC_init();
-
-	/* Get structs */
-	Terminal_Struct* ts = Terminal_Struct_init();
-	BT_Struct* bs = BT_Struct_Init();
-	Sound_struct* ss = Sound_Struct_init();
-
-	
+	LCD_Clear(WHITE);
+	T_RCC_Init();
+	BT_RCC_Init();
+//	Sound_RCC_Init();
 
 	/* Configuration of GPIO, Timer ... */
 	initLED();
-	BT_init();
-	Terminal_init();
-	Sound_init();
-	init_Timer2();
-	GPIO_touch_init_all();
+	BT_Init();
+	T_Init();
+//	Sound_Init();
 
-	/* Acutal run part */
+//	ADC_DMA_Config();
+//	GPIO_Touch_Init_All();
+//	Piezo_Config();
+//	GPIO_Button_Init();
+
+	/* Actual run part */
 	BT_Run();
-	Terminal_Run();
-	Sound_Run();
-	Sound_Test_init();
+	T_Run();
+//	Sound_Run();
+//	Sound_Test_Init(); // if uncomment this, main will be stuck here
+//	Init_Sound_Timer2();
 
 	/* Reset Part */
-	LCD_Clear(WHITE);
-	LCD_ShowNum(100, 200, 234, 5, WHITE, BLUE);
 
 	while(1) {
-		BT_sendToTerminal();
-		Terminal_sendToBT();
+		BT_SendToTerminal();
+		T_SendToBT();
 	}
 }
 

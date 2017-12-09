@@ -21,15 +21,15 @@ typedef struct {
 } Sound_struct;
 
 
-Sound_struct* Sound_Struct_init(void);
+Sound_struct* Sound_Struct_Init(void);
 
-void Sound_RCC_init(void);
-void Sound_init(void);
+void Sound_RCC_Init(void);
+void Sound_Init(void);
 void Sound_Run(void);
 
 //// test function
-void Sound_Test_init(void);
-void Sound_Test_run(void);
+void Sound_Test_Init(void);
+void Sound_Test_Run(void);
 ////
 
 void I2C2_StartTransmission(uint8_t transmissionDirection, uint8_t slaveAddress);
@@ -37,7 +37,7 @@ void I2C2_WriteData(uint8_t data);
 uint8_t I2C2_ReadData(void);
 void I2C2_Stop(void);
 
-void I2S2_TX_DMA_init(u8*, u8*, u16);
+void I2S2_TX_DMA_Init(u8*, u8*, u16);
 
 static u8 buf[100] = {
 		0x22, 0x22, 0x12, 0x78, 0x02,

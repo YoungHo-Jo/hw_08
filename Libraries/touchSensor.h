@@ -15,26 +15,17 @@
 #include "stm32f10x_tim.h"
 
 
-typedef struct __GPIO_setting_data {
-    uint8_t pin_src;
-    uint32_t exti_line;
-    uint32_t exti_irqn;
-    uint8_t port_src;
-    GPIO_TypeDef * GPIOx;
-} GPIO_setting_data;
-
 void EXTI1_IRQHandler(void);
-void EXTI3_IRQHandler(void);
-void EXTI4_IRQHandler(void);
 void EXTI9_5_IRQHandler(void);
 
-GPIO_setting_data get_GPIO_Setting_Data(uint16_t key);
-void GPIO_touch_init(uint16_t key);
-void GPIO_touch_init_all(void);
+void GPIO_Touch_Init(GPIO_TypeDef * GPIO_x,
+		             uint16_t GPIO_Pin_x,
+		             uint8_t GPIO_PortSource_x,
+		             uint8_t GPIO_PinSource_x,
+		             uint32_t EXTI_Line_x,
+		             uint8_t EXTI_x_IRQn);
+void GPIO_Touch_Init_All(void);
 
 
 #endif
-
-
-
 

@@ -10,14 +10,13 @@
 #include "stm32f10x_rcc.h"
 #include "init.h"
 
-#define USRAT_RX_BUFFER_SIZE 1000
 
 typedef struct {
-	uint16_t BT_TX;
-	uint16_t BT_RX;
-	GPIO_TypeDef* BT_GPIO;
-	char BT_RX_Buffer[USART_RX_BUFFER_SIZE];
-	uint16_t BT_RX_Counter;
+	uint16_t TX;
+	uint16_t RX;
+	GPIO_TypeDef* GPIO;
+	char RX_Buffer[USART_RX_BUFFER_SIZE];
+	uint16_t RX_Counter;
 	uint8_t readyToSend;
 } BT_Struct;
 
@@ -26,13 +25,13 @@ typedef struct {
 void USART2_IRQHandler(void);
 
 BT_Struct* BT_Struct_Init(void);
-void BT_RCC_init(void);
-void BT_init(void);
+void BT_RCC_Init(void);
+void BT_Init(void);
 void BT_IRQHandler(void);
 void BT_Run(void);
 
-void BT_sendToTerminal(void);
-void BT_storeInBuf(uint16_t c);
+void BT_SendToTerminal(void);
+void BT_StoreInBuf(uint16_t c);
 
 #endif
 

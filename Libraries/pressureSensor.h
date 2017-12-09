@@ -1,5 +1,5 @@
-#ifndef __PRESSURE_SENSOR_H__
-#define __PRESSURE_SENSOR_H__
+#ifndef PRESSURE_SENSOR_H
+#define PRESSURE_SENSOR_H
 
 #include "stm32f10x_adc.h"
 #include "stm32f10x_dma.h"
@@ -8,7 +8,6 @@
 #include "misc.h"
 
 
-void GPIO_config(void);
-void adc_config(void);
+void ADC_DMA_Config(void);
 
 #endif

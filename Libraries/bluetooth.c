@@ -2,28 +2,29 @@
 
 BT_Struct bs;
 
-void BT_RCC_Init() {
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-}
+
 
 BT_Struct* BT_Struct_Init() {
-	bs.BT_TX = GPIO_Pin_2;
-	bs.BT_RX = GPIO_Pin_3;
-	bs.BT_GPIO = GPIOA;
-	bs.BT_RX_Counter = 0;
+	bs.TX = GPIO_Pin_2;
+	bs.RX = GPIO_Pin_3;
+	bs.GPIO = GPIOA;
+	bs.RX_Counter = 0;
 	bs.readyToSend = FALSE;
 
 	return &bs;
 }
 
-void BT_init() {
+void BT_RCC_Init() {
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+}
+
+void BT_Init() {
 	USART_InitTypeDef USART2_init_struct;
 	GPIO_InitTypeDef GPIOA_init_struct;
 	NVIC_InitTypeDef NVIC_init_struct;
-	DMA_InitTypeDef DMA_InitStructure;
+//	DMA_InitTypeDef DMA_InitStructure;
 
-	BT_RCC_Init();
 	BT_Struct_Init();
 
 	// Output GPIO pin init
@@ -89,11 +90,11 @@ void BT_IRQHandler(void) {
 		uint16_t c = USART_ReceiveData(USART2);
 
 		if (c == '\r' || c == '\n') {
-			BT_storeInBuf(c);
+			BT_StoreInBuf(c);
 
 			bs.readyToSend = TRUE;
-		} else if (bs.BT_RX_Counter < USART_RX_BUFFER_SIZE) {
-			BT_storeInBuf(c);
+		} else if (bs.RX_Counter < USART_RX_BUFFER_SIZE) {
+			BT_StoreInBuf(c);
 		}
 
 
@@ -102,28 +103,27 @@ void BT_IRQHandler(void) {
 	}
 }
 
-void BT_sendToTerminal() {
+void BT_SendToTerminal() {
 	if (bs.readyToSend == TRUE) {
 		uint16_t i = 0;
-		for (i = 0; i < bs.BT_RX_Counter; i++) {
+		for (i = 0; i < bs.RX_Counter; i++) {
 			// send content of the buffer
-			USART_SendData(USART1, bs.BT_RX_Buffer[i]);
+			USART_SendData(USART1, bs.RX_Buffer[i]);
 			while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE))
 				;
 		}
 		// rest the counter of the buffer
-		bs.BT_RX_Counter = 0;
+		bs.RX_Counter = 0;
 
 		// reset the flag
 		bs.readyToSend = FALSE;
-		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 	}
 }
 
-void BT_storeInBuf(uint16_t c) {
+void BT_StoreInBuf(uint16_t c) {
 	// store to the buffer
-	bs.BT_RX_Buffer[bs.BT_RX_Counter] = c;
+	bs.RX_Buffer[bs.RX_Counter] = c;
 	// increase the counter of the buffer
-	bs.BT_RX_Counter++;
+	bs.RX_Counter++;
 }
 
