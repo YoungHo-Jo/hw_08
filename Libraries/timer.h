@@ -19,5 +19,7 @@ void Init_Sound_Timer2(void);
 void TIM2_IRQHandler(void);
 void GPIO_Button_Init(void);
 void EXTI15_10_IRQHandler(void);
+void Timer_Start(void);
+void Timer_Stop(void);
 
 #endif /* TIMER_H_ */

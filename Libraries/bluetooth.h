@@ -1,6 +1,6 @@
 #ifndef __BLUETOOTH_H__
 #define __BLUETOOTH_H__
-#define USART_RX_BUFFER_SIZE 1000
+#define USART_RX_BUFFER_SIZE 1500
 
 #include "misc.h"
 #include "stm32f10x.h"
@@ -9,7 +9,8 @@
 #include "stm32f10x_usart.h"
 #include "stm32f10x_rcc.h"
 #include "init.h"
-
+#include "timer.h"
+#include "piezo.h"
 
 typedef struct {
 	uint16_t TX;

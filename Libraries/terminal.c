@@ -13,7 +13,9 @@ T_Struct* T_Struct_Init() {
 
 void T_RCC_Init() {
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA,ENABLE);
+	RCC_APB2PeriphClockCmd(
+			RCC_APB2Periph_USART1 | RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA,
+			ENABLE);
 }
 
 void T_Init() {
@@ -35,26 +37,27 @@ void T_Init() {
 	GPIO_Init(GPIOA, &gpioa_init_struct);
 
 	/*
-	DMA_DeInit(DMA1_Channel7);
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &USART2->DR;
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) ts.RX_Buffer;
-	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-	DMA_InitStructure.DMA_BufferSize = TERMINAL_RX_BUFFER_SIZE;
-	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-	DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
-	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-	DMA_Init(DMA1_Channel7, &DMA_InitStructure);
-	*/
+	 DMA_DeInit(DMA1_Channel7);
+	 DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &USART2->DR;
+	 DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) ts.RX_Buffer;
+	 DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+	 DMA_InitStructure.DMA_BufferSize = TERMINAL_RX_BUFFER_SIZE;
+	 DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	 DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	 DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	 DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	 DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+	 DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+	 DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	 DMA_Init(DMA1_Channel7, &DMA_InitStructure);
+	 */
 	usart1_init_struct.USART_BaudRate = 115200;
 	usart1_init_struct.USART_WordLength = USART_WordLength_8b;
 	usart1_init_struct.USART_StopBits = USART_StopBits_1;
 	usart1_init_struct.USART_Parity = USART_Parity_No;
 	usart1_init_struct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	usart1_init_struct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	usart1_init_struct.USART_HardwareFlowControl =
+			USART_HardwareFlowControl_None;
 	USART_Init(USART1, &usart1_init_struct);
 
 	nvic_init_struct.NVIC_IRQChannel = USART1_IRQn;
@@ -69,23 +72,34 @@ void T_Init() {
 }
 void T_IRQHandler() {
 	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
-			char c = USART_ReceiveData(USART1);
+		char c = USART_ReceiveData(USART1);
+		if (c != 0) {
+			// Stop Timers
+			Timer_Stop();
+			Piezo_Stop();
+			setLED(0, 1, 0, 0);
 
 			if (c == '\r' || c == '\n') {
 				T_StoreInBuf(c);
 
 				USART_SendData(USART1, '\r');
-				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
+				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE))
+					;
+
 				ts.readyToSend = TRUE;
 			} else if (ts.RX_Counter < TERMINAL_RX_BUFFER_SIZE) {
 				T_StoreInBuf(c);
 
 				USART_SendData(USART1, c);
-				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE));
+				while (!USART_GetFlagStatus(USART1, USART_FLAG_TXE))
+					;
 			}
-
-			USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+		} else {
+			setLED(0, 0, 1, 0);
 		}
+
+		USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+	}
 }
 
 void USART1_IRQHandler(void) {
@@ -101,11 +115,17 @@ void T_SendToBT() {
 		int i = 0;
 		for (i = 0; i < ts.RX_Counter; i++) {
 			USART_SendData(USART2, ts.RX_Buffer[i]);
-			while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE));
+			while (!USART_GetFlagStatus(USART2, USART_FLAG_TXE))
+				;
 		}
 		ts.RX_Counter = 0;
 
 		ts.readyToSend = FALSE;
+
+		// Start Timers
+		Timer_Start();
+		Piezo_Start();
+		setLED(0, 0, 0, 0);
 	}
 }
 

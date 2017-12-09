@@ -8,8 +8,10 @@
 #include "stm32f10x_usart.h"
 #include "stm32f10x_dma.h"
 #include "init.h"
+#include "timer.h"
+#include "piezo.h"
 
-#define TERMINAL_RX_BUFFER_SIZE (1000)
+#define TERMINAL_RX_BUFFER_SIZE 1500
 
 typedef struct {
 	uint16_t TX;

@@ -28,17 +28,17 @@ void Init_Record_Timer4() {
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);  //NVIC ?貫�껆뵳怨ㅼ삕��
+	NVIC_Init(&NVIC_InitStructure);  //NVIC ?縕ワ옙猿녿뎨�ⓦ끉�뺧옙占�
 
 	// TIM2 Initialize
-	TIM_TimeBaseStructure.TIM_Period = 1000 - 1; // 100kHz// �낅슣�딁뵳?
+	TIM_TimeBaseStructure.TIM_Period = 1000 - 1; // 100kHz// 占쎈굝�ｏ옙�곷뎨?
 	TIM_TimeBaseStructure.TIM_Prescaler = 1000; //
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure); //�좎룞��??貫�껆뵳怨ㅼ삕��
+	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure); //占쎌쥙猷욑옙占�?縕ワ옙猿녿뎨�ⓦ끉�뺧옙占�
 
 	// TIM2 Enale
-	TIM_Cmd(TIM4, ENABLE); //�좎룞��醫귥넂筌롫챿���띠룊�숃キ琉꾠럶?�노듆 �좎럥梨멱땻節륁삕?�??�꾩룇裕뉑틦?
+	TIM_Cmd(TIM4, ENABLE); //占쎌쥙猷욑옙占썽넫洹λ꼥嶺뚮∥梨울옙占쏙옙�좊즸占쎌늺��쭔袁좊윾?占쎈끂��占쎌쥙�ο㎖硫깅빝影�쪇��占�?占쎄쑴猷뉓짆�묓떐?
 	TIM_ITConfig(TIM4, TIM_IT_Update | TIM_IT_CC1, ENABLE); // interrupt enable
 }
 

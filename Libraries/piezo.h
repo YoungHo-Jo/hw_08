@@ -17,4 +17,7 @@
 void Piezo_Config(void);
 void setSound(uint32_t syll);
 
+void Piezo_Start(void);
+void Piezo_Stop(void);
+
 #endif /* PIEZO_H_ */
