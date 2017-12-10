@@ -1,14 +1,14 @@
-#ifndef __TERMINAL_H__
-#define __TERMINAL_H__
+#ifndef TERMINAL_H
+#define TERMINAL_H
 
-#include "init.h"
 #include "misc.h"
 #include "stm32f10x.h"
+#include "stm32f10x_rcc.h"
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_usart.h"
-#include "stm32f10x_rcc.h"
+#include "stm32f10x_dma.h"
 
-#define TERMINAL_RX_BUFFER_SIZE 1000
+#define TERMINAL_RX_BUFFER_SIZE (1000)
 
 typedef struct {
 	uint16_t TX;
@@ -16,7 +16,6 @@ typedef struct {
 	GPIO_TypeDef* GPIO;
 	char RX_Buffer[TERMINAL_RX_BUFFER_SIZE];
 	uint16_t RX_Counter;
-	uint8_t readyToSend;
 } Terminal_Struct;
 
 // reserved function in CORTEXT-M3
@@ -27,8 +26,10 @@ void Terminal_Rcc_init(void);
 void Terminal_init(void);
 void Terminal_IRQHandler(void);
 void Terminal_Run(void);
-
 void Terminal_sendToBT(void);
 void Terminal_storeInBuf(uint16_t c);
 
 #endif
+
+
+

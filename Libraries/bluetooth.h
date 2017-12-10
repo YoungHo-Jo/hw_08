@@ -4,10 +4,13 @@
 
 #include "misc.h"
 #include "stm32f10x.h"
+#include "stm32f10x_rcc.h"
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_usart.h"
 #include "stm32f10x_rcc.h"
 #include "init.h"
+
+#define USRAT_RX_BUFFER_SIZE 1000
 
 typedef struct {
 	uint16_t BT_TX;
@@ -32,3 +35,6 @@ void BT_sendToTerminal(void);
 void BT_storeInBuf(uint16_t c);
 
 #endif
+
+
+

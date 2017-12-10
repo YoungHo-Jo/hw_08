@@ -1,0 +1,110 @@
+/*
+ * main.c
+ *
+ *  Created on: 2017. 12. 7.
+ *      Author: owk
+ */
+
+
+// flash load ./a/Debug/a.axf
+#include "init.h"
+#include "bluetooth.h"
+#include "lcd.h"
+#include "Touch.h"
+#include "touchSensor.h"
+#include "pressureSensor.h"
+#include "terminal.h"
+<<<<<<< HEAD
+#include "sound.h"
+#include "piezo.h"
+
+
+
+// flash load "./hw_team08/Debug/hw_team08.axf"
+
+// flash load ./a/Debug/a.axf
+// flash load ./a/hw_08/flashclear.axf
+
+
+int main(void) {
+	// set system and set clock
+	// =========== RCC init part ===========
+	defaultSystemInit();
+//	LCD_Init();
+//	Terminal_Rcc_init();
+//	BT_RCC_init();
+	Sound_RCC_init();
+
+	// =========== get struct =============
+//	Terminal_Struct* ts = Terminal_Struct_init();
+//	BT_Struct* bs = BT_Struct_Init();
+	Sound_struct* ss = Sound_Struct_init();
+
+//	LCD_Clear(WHITE);
+//	LCD_ShowNum(100, 200, 234, 5, WHITE, BLUE);
+
+	//============ config init ==============
+	initLED();
+//	BT_init();
+//	Terminal_init();
+
+	Sound_init();
+	// gpio touch init�� init timer�� lcd init ���� �� ��� lcd init�� ����� �̷������ ������
+	// ��� 1�� ���� ����
+//	GPIO_touch_init_all();
+
+	// run
+//	BT_Run();
+//	Terminal_Run();
+	Sound_Run();
+
+	RCC->APB2ENR = RCC_APB2ENR_IOPAEN;
+	GPIOA->CRH = GPIO_CRH_CNF8_1 | GPIO_CRH_MODE8;
+	RCC->CFGR |= RCC_CFGR2_I2S2SRC;
+
+//	Sound_Test_init();
+	// TIMER �۵��� ����������� ����� ���� USART�� ����� Ÿ�̸Ӱ� ��������� ������
+	// �������� ���� �����Ͱ� ��۵Ǿ� �߸�� ���ڰ� �͹̳ο� ������ Ȯ���Ͽ���
+//	init_Timer2();
+
+
+=======
+#include "bluetooth.h"
+#include "timer.h"
+
+
+int main(void) {
+	defaultSystemInit();
+
+	LCD_Init();
+	LCD_Clear(WHITE);
+	LCD_ShowNum(100, 200, 234, 5, WHITE, BLUE);
+
+	GPIO_touch_init_all();
+	//adc_config();
+
+	init_Timer2();
+>>>>>>> terminal
+
+	while (1) {
+//		Terminal_sendToBT();
+//		BT_sendToTerminal();
+
+		//// test
+		Sound_Test_run();
+		////
+
+
+		uint8_t bclk = I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY);
+		uint8_t dacdat = GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_15);
+		uint8_t lrc = GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_12);
+		uint8_t txe = SPI_I2S_GetFlagStatus(SPI2, SPI_I2S_FLAG_BSY);
+		setLED(bclk, lrc, dacdat, txe);
+	}
+}
+
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> terminal
