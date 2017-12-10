@@ -53,8 +53,8 @@ int main(void) {
 	LCD_ShowNum(100, 200, 234, 5, WHITE, BLUE);
 
 	while(1) {
-		
-
+		BT_sendToTerminal();
+		Terminal_sendToBT();
 	}
 }
 
